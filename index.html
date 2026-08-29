@@ -181,7 +181,7 @@
 
       <div class="grid2">
         <div class="panel">
-          <div class="panel-head"><h3>Apertura de WF Devueltas — motivo del banco</h3></div>
+          <div class="panel-head"><h3>Apertura de WF Devueltas — motivo del banco</h3><span class="pill-count" id="devueltasCount"></span></div>
           <div class="chartbox" style="height:280px;"><canvas id="chartMotivos"></canvas></div>
         </div>
         <div class="panel">
@@ -223,10 +223,10 @@
 
       <div class="grid2">
         <div class="panel">
-          <div class="panel-head"><h3>Ventas pendientes por asignación</h3></div>
+          <div class="panel-head"><h3>Ventas pendientes por asignación</h3><span class="pill-count" id="pendCount"></span></div>
           <div class="table-scroll">
             <table id="tblPendientes">
-              <thead><tr><th>Asignado a</th><th>Cantidad</th><th>% del total</th></tr></thead>
+              <thead><tr><th>Fecha de venta</th><th style="text-align:left;">Ejecutivo</th><th>Canal</th><th style="text-align:left;">Validador asignado</th></tr></thead>
               <tbody></tbody>
             </table>
           </div>
@@ -279,10 +279,10 @@ function parseFecha(v){
 }
 function parseHora(v){
   if(!v) return null;
-  const s = String(v).trim();
-  const m = s.match(/(\d{1,2}):(\d{2}):(\d{2})/);
-  if(m) return parseInt(m[1]);
   if(v instanceof Date) return v.getHours();
+  const s = String(v).trim();
+  const m = s.match(/(\d{1,2}):(\d{1,2})/);
+  if(m) return parseInt(m[1]);
   return null;
 }
 function isoDay(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
@@ -624,6 +624,7 @@ function renderWfTable(data){
 function renderMotivos(data){
   destroyChart('motivos');
   const devueltas = data.filter(r=> r.estadoWF==='WF DEVUELTO' && r.motivoDevuelta);
+  document.getElementById('devueltasCount').textContent = 'Total: ' + devueltas.length.toLocaleString('es-PE');
   const counts={};
   devueltas.forEach(r=>{ counts[r.motivoDevuelta]=(counts[r.motivoDevuelta]||0)+1; });
   const entries=Object.entries(counts).sort((a,b)=>a[1]-b[1]);
@@ -762,24 +763,18 @@ function mixColor(c1,c2,t){
 }
 
 function renderPendientes(data){
-  const pend = data.filter(r=>r.resultado==='PENDIENTE');
-  const total = pend.length;
-  const byAsig = {};
-  pend.forEach(r=>{
-    const key = r.validador || 'Sin asignar';
-    byAsig[key] = (byAsig[key]||0)+1;
+  const pend = data.filter(r=>r.resultado==='PENDIENTE').slice().sort((a,b)=>{
+    const da = a.f_venta||''; const db = b.f_venta||'';
+    return db.localeCompare(da);
   });
-  const entries = Object.entries(byAsig).sort((a,b)=>{
-    if(a[0]==='Sin asignar') return -1;
-    if(b[0]==='Sin asignar') return 1;
-    return b[1]-a[1];
-  });
+  document.getElementById('pendCount').textContent = pend.length.toLocaleString('es-PE')+' pendientes';
   const tbody = document.querySelector('#tblPendientes tbody');
-  tbody.innerHTML = entries.map(([name,n])=>{
-    const cls = name==='Sin asignar' ? ' class="pend-alert"' : '';
-    const label = name==='Sin asignar' ? 'Sin asignar' : formatNombre(name);
-    return '<tr'+cls+'><td>'+label+'</td><td>'+n+'</td><td><span class="pill '+(name==='Sin asignar'?'bad':'warn')+'">'+pct(n,total)+'%</span></td></tr>';
-  }).join('') + '<tr class="total-row"><td>Total pendientes</td><td>'+total+'</td><td>100.0%</td></tr>';
+  tbody.innerHTML = pend.length ? pend.map(r=>{
+    const sinAsignar = !r.validador;
+    const cls = sinAsignar ? ' class="pend-alert"' : '';
+    const validadorLabel = sinAsignar ? 'Sin asignar' : formatNombre(r.validador);
+    return '<tr'+cls+'><td>'+(r.f_venta?diaLabel(r.f_venta):'—')+'</td><td style="text-align:left;">'+formatNombre(r.ejecutivo)+'</td><td>'+r.canal+'</td><td style="text-align:left; font-weight:600;">'+validadorLabel+'</td></tr>';
+  }).join('') : '<tr><td colspan="4" style="text-align:center; color:var(--ink-mute);">Sin ventas pendientes</td></tr>';
 }
 
 function renderDevValidador(data){
