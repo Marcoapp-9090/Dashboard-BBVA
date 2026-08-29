@@ -140,6 +140,7 @@
   <div class="tabs">
     <div class="tab active" data-view="global">Vista Global</div>
     <div class="tab" data-view="mc">Vista MC</div>
+    <div class="tab" data-view="asesor">Vista por Asesor</div>
   </div>
 </div>
 
@@ -187,7 +188,7 @@
 
       <div class="grid2">
         <div class="panel">
-          <div class="panel-head"><h3>Apertura de WF Devueltas — motivo del banco</h3><span class="pill-count" id="devueltasCount"></span></div>
+          <div class="panel-head"><h3>Apertura de WF Devueltas — motivo del banco</h3><span class="pill-count" id="devueltasCount"></span><button class="btn small" id="btnDescargarDevBanco" style="background:var(--blue); color:#fff;">⬇ Descargar</button></div>
           <div class="chartbox" style="height:280px;"><canvas id="chartMotivos"></canvas></div>
         </div>
         <div class="panel">
@@ -235,10 +236,39 @@
         </div>
         <div class="panel">
           <div class="panel-head"><h3>Devueltas MC</h3><button class="btn small" id="btnDescargarDevMC" style="background:var(--blue); color:#fff;">⬇ Descargar</button></div>
-          <div class="chartbox" style="height:360px;"><canvas id="chartDevValidador"></canvas></div>
+          <div class="table-scroll">
+            <table id="tblDevValidador">
+              <thead><tr><th style="text-align:left;">Fecha de devolución</th><th style="text-align:left;">Validador</th><th style="text-align:left;">Motivo</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
         </div>
       </div>
       <footer>BBVA Perú · Mesa de Control de validadores</footer>
+    </div>
+
+    <!-- ============ VISTA POR ASESOR ============ -->
+    <div id="viewAsesor" class="hidden">
+      <div class="panel" style="margin-bottom:14px;">
+        <div class="panel-head"><h3>Ventas por asesor</h3></div>
+        <div class="table-scroll">
+          <table id="tblAsesor">
+            <thead><tr><th style="text-align:left;">Ejecutivo</th><th style="text-align:left;">Canal</th><th>Total ventas</th><th>Aprobadas</th><th>Observadas</th><th>Rechazadas</th><th>Pendientes</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h3>Top 10 asesores — más ventas observadas (histórico)</h3></div>
+        <div class="table-scroll">
+          <table id="tblAsesorObs">
+            <thead><tr><th style="text-align:left;">Ejecutivo</th><th>Total observadas</th><th style="text-align:left;">Motivos principales</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+      <footer>BBVA Perú · Vista por asesor</footer>
     </div>
 
   </div>
@@ -251,6 +281,7 @@ const MOTIVO_COLORS = [BLUE,AQUA,AMBER,RED,GRAY,'#1464A5','#B5760A','#6b7a94','#
 const MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 
 const MOTIVO_CATALOGO = [
+  ['SIN OFETA','Sin oferta MOI'],
   ['SIN OFERTA','Sin oferta MOI'],
   ['OFERTA EN VUELO','Oferta en vuelo'],
   ['LINEA DE CREDITO','Por línea de crédito'],
@@ -335,7 +366,7 @@ function homologar(texto, catalogo, fallback){
 }
 
 function extraerMotivoYIntentos(texto){
-  if(!texto) return {motivo:null, intentos:0};
+  if(!texto) return {motivo:null, intentos:0, fecha:null};
   const t = String(texto);
   const re = /(\d{1,2}\/\d{1,2}\/\d{4})\s+\d{2}:\d{2}:\d{2}\s+MOTIVO RECHAZO\s*\/\s*MOTIVO DEVOLUCION\s*:\s*([^\n]{1,200}?)(?=\s*\d{1,2}\/\d{1,2}\/\d{2,4}|\s*$)/g;
   let match, best=null, count=0;
@@ -345,9 +376,9 @@ function extraerMotivoYIntentos(texto){
     const texto2 = match[2].trim();
     if(!best || (fecha && best.fecha && fecha > best.fecha) || (fecha && !best.fecha)) best = {fecha, texto:texto2};
   }
-  if(!best) return {motivo:null, intentos:count};
-  const motivoCorto = homologar(best.texto, MOTIVO_CATALOGO, 'Otro motivo');
-  return {motivo:motivoCorto, intentos:count};
+  if(!best) return {motivo:null, intentos:count, fecha:null};
+  const motivoCorto = homologar(best.texto, MOTIVO_CATALOGO, 'Sin motivo registrado');
+  return {motivo:motivoCorto, intentos:count, fecha: best.fecha ? isoDay(best.fecha) : null};
 }
 
 function parseRows(rows, canal){
@@ -375,6 +406,7 @@ function parseRows(rows, canal){
       motivoRO,
       motivoObs,
       motivoDevuelta: wfInfo.motivo,
+      fechaDevolucion: wfInfo.fecha,
       intentos: wfInfo.intentos
     };
   }).filter(r=> r.ejecutivo !== 'SIN ASIGNAR' || r.validador);
@@ -413,10 +445,12 @@ document.querySelectorAll('.tab').forEach(t=>{
     t.classList.add('active');
     document.getElementById('viewGlobal').classList.toggle('hidden', currentView!=='global');
     document.getElementById('viewMC').classList.toggle('hidden', currentView!=='mc');
+    document.getElementById('viewAsesor').classList.toggle('hidden', currentView!=='asesor');
     render();
   });
 });
 document.getElementById('btnDescargarDevMC').addEventListener('click', descargarDevueltasMC);
+document.getElementById('btnDescargarDevBanco').addEventListener('click', descargarDevueltasBanco);
 
 async function handleFile(e, canal){
   const file = e.target.files[0];
@@ -510,6 +544,11 @@ function getFiltered(){
     (!ej || r.ejecutivo===ej) && (!va || r.validador===va)
   );
 }
+function getFilteredHistorico(){
+  const canal=document.getElementById('fCanal').value;
+  const va=document.getElementById('fValidador').value;
+  return RECORDS.filter(r=> (!canal || r.canal===canal) && (!va || r.validador===va));
+}
 
 function render(){
   const data = getFiltered();
@@ -520,12 +559,15 @@ function render(){
     renderWfTable(data);
     renderMotivos(data);
     renderRecuperacion(data);
-  } else {
+  } else if(currentView==='mc'){
     renderMcKPIs(data);
     renderAvanceValidador(data);
     renderHeatmap(data);
     renderPendientes(data);
     renderDevValidador(data);
+  } else {
+    renderAsesorTable(data);
+    renderAsesorObsRanking();
   }
 }
 
@@ -675,9 +717,11 @@ function renderWfTable(data){
     const v=byDay[d]; const total=v.devuelto+v.formalizado+v.presentado;
     tD+=v.devuelto; tF+=v.formalizado; tP+=v.presentado;
     const wpct = Math.max(6, Math.round((total/maxTotal)*100));
-    return '<tr><td class="num-formalizado">'+(v.formalizado||'—')+'</td></tr>'.replace('<tr>','<tr><td>'+diaLabel(d)+'</td>')
-      .replace('</tr>', '<td class="num-presentado">'+(v.presentado||'—')+'</td><td class="num-devuelto">'+(v.devuelto||'—')+
-      '</td><td class="bar-cell"><div class="barfill" style="width:calc('+wpct+'% - 12px);"></div><span class="barval">'+total.toLocaleString('es-PE')+'</span></td></tr>');
+    return '<tr><td>'+diaLabel(d)+'</td>'+
+      '<td class="num-formalizado">'+(v.formalizado||'—')+'</td>'+
+      '<td class="num-presentado">'+(v.presentado||'—')+'</td>'+
+      '<td class="num-devuelto">'+(v.devuelto||'—')+'</td>'+
+      '<td class="bar-cell"><div class="barfill" style="width:calc('+wpct+'% - 12px);"></div><span class="barval">'+total.toLocaleString('es-PE')+'</span></td></tr>';
   }).join('') + '<tr class="total-row"><td>Total general</td><td>'+tF.toLocaleString('es-PE')+'</td><td>'+tP+'</td><td>'+tD+'</td><td>'+(tD+tF+tP).toLocaleString('es-PE')+'</td></tr>';
   document.getElementById('wfCount').textContent = days.length+' días';
 }
@@ -687,7 +731,7 @@ function renderMotivos(data){
   const devueltas = data.filter(r=> r.estadoWF==='WF DEVUELTO');
   document.getElementById('devueltasCount').textContent = 'Total: '+devueltas.length.toLocaleString('es-PE');
   const counts={};
-  devueltas.forEach(r=>{ const m = r.motivoDevuelta || 'Otro motivo'; counts[m]=(counts[m]||0)+1; });
+  devueltas.forEach(r=>{ const m = r.motivoDevuelta || 'Sin motivo registrado'; counts[m]=(counts[m]||0)+1; });
   const entries=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
   charts.motivos = new Chart(document.getElementById('chartMotivos'), {
     type:'bar',
@@ -840,50 +884,25 @@ function renderPendientes(data){
 function getDevueltasMCData(){
   const data = getFiltered();
   return data.filter(r=> r.estadoWF==='WF DEVUELTO' && r.validador)
-    .map(r=> ({...r, motivoDevuelta: r.motivoDevuelta || 'Otro motivo'}))
+    .map(r=> ({...r, motivoDevuelta: r.motivoDevuelta || 'Sin motivo registrado'}))
     .filter(r=> !MOTIVOS_NO_IMPUTABLES.includes(r.motivoDevuelta));
 }
 
 function renderDevValidador(data){
-  destroyChart('devValidador');
-  const devueltas = getDevueltasMCData();
-  const byValMotivo = {};
-  const motivosSet = new Set();
-  devueltas.forEach(r=>{
-    const v = formatNombre(r.validador);
-    byValMotivo[v] = byValMotivo[v] || {};
-    byValMotivo[v][r.motivoDevuelta] = (byValMotivo[v][r.motivoDevuelta]||0)+1;
-    motivosSet.add(r.motivoDevuelta);
+  const devueltas = getDevueltasMCData().slice().sort((a,b)=>{
+    const da=a.fechaDevolucion||''; const db=b.fechaDevolucion||'';
+    return db.localeCompare(da);
   });
-  const motivos = [...motivosSet];
-  const validadores = Object.keys(byValMotivo).sort((a,b)=>{
-    const ta = Object.values(byValMotivo[a]).reduce((s,x)=>s+x,0);
-    const tb = Object.values(byValMotivo[b]).reduce((s,x)=>s+x,0);
-    return tb-ta;
-  }).slice(0,10);
-
-  charts.devValidador = new Chart(document.getElementById('chartDevValidador'), {
-    type:'bar',
-    data:{
-      labels: validadores,
-      datasets: motivos.map((m,i)=>({
-        label:m, data:validadores.map(v=>byValMotivo[v][m]||0), backgroundColor:MOTIVO_COLORS[i%MOTIVO_COLORS.length], stack:'s'
-      }))
-    },
-    options:{
-      indexAxis:'y', responsive:true, maintainAspectRatio:false,
-      plugins:{legend:{position:'bottom', labels:{boxWidth:10,font:{size:10}}}},
-      scales:{x:{stacked:true, beginAtZero:true, ticks:{precision:0}}, y:{stacked:true, ticks:{font:{size:10.5}}}}
-    }
-  });
+  const tbody = document.querySelector('#tblDevValidador tbody');
+  tbody.innerHTML = devueltas.length ? devueltas.map(r=>
+    '<tr><td style="text-align:left;">'+(r.fechaDevolucion?diaLabel(r.fechaDevolucion):'—')+'</td><td style="text-align:left; font-weight:600;">'+formatNombre(r.validador)+'</td><td style="text-align:left;">'+r.motivoDevuelta+'</td></tr>'
+  ).join('') : '<tr><td colspan="3" style="text-align:center; color:var(--ink-mute);">Sin devueltas imputables al validador</td></tr>';
 }
 
-function descargarDevueltasMC(){
-  const rows = getDevueltasMCData();
-  const header = ['DNI','Validador','Motivo','Canal'];
-  const lines = [header.join(',')];
-  rows.forEach(r=>{
-    const line = [r.dni, formatNombre(r.validador), r.motivoDevuelta, r.canal].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',');
+function descargarCSV(rows, header, filename){
+  const lines = [header.join(';')];
+  rows.forEach(row=>{
+    const line = row.map(v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"').join(';');
     lines.push(line);
   });
   const csv = '\ufeff'+lines.join('\n');
@@ -891,11 +910,67 @@ function descargarDevueltasMC(){
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'devueltas_mc_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.download = filename;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+function descargarDevueltasMC(){
+  const rows = getDevueltasMCData().map(r=>[
+    r.dni, formatNombre(r.validador), r.motivoDevuelta, r.canal, r.fechaDevolucion?diaLabel(r.fechaDevolucion):''
+  ]);
+  descargarCSV(rows, ['DNI','Validador','Motivo','Canal','Fecha de devolución'], 'devueltas_mc_'+new Date().toISOString().slice(0,10)+'.csv');
+}
+
+function descargarDevueltasBanco(){
+  const data = getFiltered().filter(r=>r.estadoWF==='WF DEVUELTO');
+  const rows = data.map(r=>[
+    r.dni, formatNombre(r.ejecutivo), formatNombre(r.validador), r.motivoDevuelta||'Sin motivo registrado', r.canal, r.fechaDevolucion?diaLabel(r.fechaDevolucion):''
+  ]);
+  descargarCSV(rows, ['DNI','Ejecutivo','Validador','Motivo','Canal','Fecha de devolución'], 'wf_devueltas_'+new Date().toISOString().slice(0,10)+'.csv');
+}
+
+/* ============ VISTA POR ASESOR ============ */
+
+function renderAsesorTable(data){
+  const byEj = {};
+  data.forEach(r=>{
+    const key = r.ejecutivo;
+    byEj[key] = byEj[key] || {total:0, canales:new Set(), validas:0, observadas:0, rechazadas:0, pendientes:0};
+    byEj[key].total++;
+    byEj[key].canales.add(r.canal);
+    if(r.resultado==='VALIDA') byEj[key].validas++;
+    if(r.resultado==='OBSERVADA') byEj[key].observadas++;
+    if(r.resultado==='RECHAZADA') byEj[key].rechazadas++;
+    if(r.resultado==='PENDIENTE') byEj[key].pendientes++;
+  });
+  const rows = Object.entries(byEj).sort((a,b)=>b[1].total-a[1].total);
+  const cell = (n,total)=> n.toLocaleString('es-PE')+'<span class="cellsub" style="color:var(--ink-mute);">'+pct(n,total)+'%</span>';
+  const tbody = document.querySelector('#tblAsesor tbody');
+  tbody.innerHTML = rows.length ? rows.map(([name,v])=>
+    '<tr><td style="text-align:left;">'+formatNombre(name)+'</td><td style="text-align:left;">'+[...v.canales].join(', ')+'</td><td>'+v.total.toLocaleString('es-PE')+'</td>'+
+    '<td>'+cell(v.validas,v.total)+'</td><td>'+cell(v.observadas,v.total)+'</td><td>'+cell(v.rechazadas,v.total)+'</td><td>'+cell(v.pendientes,v.total)+'</td></tr>'
+  ).join('') : '<tr><td colspan="7" style="text-align:center; color:var(--ink-mute);">Sin datos</td></tr>';
+}
+
+function renderAsesorObsRanking(){
+  const data = getFilteredHistorico().filter(r=>r.resultado==='OBSERVADA');
+  const byEj = {};
+  data.forEach(r=>{
+    const key = r.ejecutivo;
+    byEj[key] = byEj[key] || {total:0, motivos:{}};
+    byEj[key].total++;
+    const m = r.motivoObs || 'Otro motivo';
+    byEj[key].motivos[m] = (byEj[key].motivos[m]||0)+1;
+  });
+  const top = Object.entries(byEj).sort((a,b)=>b[1].total-a[1].total).slice(0,10);
+  const tbody = document.querySelector('#tblAsesorObs tbody');
+  tbody.innerHTML = top.length ? top.map(([name,v])=>{
+    const motivosTxt = Object.entries(v.motivos).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([m,n])=>m+' ('+n+')').join(', ');
+    return '<tr><td style="text-align:left;">'+formatNombre(name)+'</td><td>'+v.total.toLocaleString('es-PE')+'</td><td style="text-align:left; font-size:11.5px;">'+motivosTxt+'</td></tr>';
+  }).join('') : '<tr><td colspan="3" style="text-align:center; color:var(--ink-mute);">Sin datos</td></tr>';
 }
 
 loadStored();
