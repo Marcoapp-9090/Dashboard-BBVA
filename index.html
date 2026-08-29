@@ -64,7 +64,8 @@
   .frow .p{font-size:11.5px; color:var(--ink-soft); min-width:56px; text-align:right; font-variant-numeric:tabular-nums;}
   .frow.total{background:var(--navy); margin-top:3px;}
   .frow.total .name, .frow.total .n, .frow.total .p{color:#fff;}
-  .frow.lvl1{background:var(--accent-soft); cursor:pointer;}
+  .frow.lvl1{background:var(--accent-soft);}
+  .frow.has-toggle{cursor:pointer;}
   .frow.sub{background:#f6f8fb; margin-left:22px;}
   .frow.sub .name{font-weight:500; color:var(--ink-soft); font-size:12px;}
   .frow.highlight{background:var(--aqua-soft); border:1px solid var(--aqua);}
@@ -380,29 +381,56 @@ function renderKPIs(data){
   ).join('');
 }
 
-let funnelExpanded = true;
+let funnelState = {VALIDA:true, RECHAZADA:false};
 function renderFunnel(data){
   const total=data.length;
+
   const valida=data.filter(r=>r.resultado==='VALIDA');
-  const wfDevuelto = valida.filter(r=>r.estado==='WF DEVUELTO').length;
-  const wfPresentado = valida.filter(r=>r.estado==='WF PRESENTADO').length;
-  const wfFormalizado = valida.filter(r=>r.estado==='WF FORMALIZADO').length;
-  const rechazada = data.filter(r=>r.resultado==='RECHAZADA').length;
+  const validaSubs = [
+    {name:'WF Devuelto', n:valida.filter(r=>r.estado==='WF DEVUELTO').length, highlight:false},
+    {name:'WF Presentado', n:valida.filter(r=>r.estado==='WF PRESENTADO').length, highlight:false},
+    {name:'WF Formalizado', n:valida.filter(r=>r.estado==='WF FORMALIZADO').length, highlight:true}
+  ].sort((a,b)=>b.n-a.n);
+
+  const rechazada = data.filter(r=>r.resultado==='RECHAZADA');
+  const rechazadaCounts = {};
+  rechazada.forEach(r=>{ const m = r.motivo || 'SIN MOTIVO'; rechazadaCounts[m]=(rechazadaCounts[m]||0)+1; });
+  const rechazadaSubs = Object.entries(rechazadaCounts).sort((a,b)=>b[1]-a[1]).map(([name,n])=>({name,n,highlight:false}));
+
   const observada = data.filter(r=>r.resultado==='OBSERVADA').length;
   const pendiente = data.filter(r=>r.resultado==='PENDIENTE').length;
+
+  const groups = [
+    {key:'VALIDA', rowClass:'lvl1', n:valida.length, subs:validaSubs},
+    {key:'RECHAZADA', rowClass:'bad-row', n:rechazada.length, subs:rechazadaSubs},
+    {key:'OBSERVADA', rowClass:'warn-row', n:observada, subs:null},
+    {key:'PENDIENTE', rowClass:'', n:pendiente, subs:null}
+  ].sort((a,b)=>b.n-a.n);
+
   const el = document.getElementById('funnel');
-  const subDisplay = funnelExpanded ? '' : 'display:none;';
-  el.innerHTML = `
-    <div class="frow lvl1" id="funnelToggle"><div class="chev">${funnelExpanded?'▾':'▸'}</div><div class="name">VALIDA</div><div class="n">${valida.length.toLocaleString('es-PE')}</div><div class="p">${pct(valida.length,total)}%</div></div>
-    <div class="frow sub" style="${subDisplay}"><div class="chev"></div><div class="name">WF Devuelto</div><div class="n">${wfDevuelto.toLocaleString('es-PE')}</div><div class="p">${pct(wfDevuelto,total)}%</div></div>
-    <div class="frow sub" style="${subDisplay}"><div class="chev"></div><div class="name">WF Presentado</div><div class="n">${wfPresentado.toLocaleString('es-PE')}</div><div class="p">${pct(wfPresentado,total)}%</div></div>
-    <div class="frow sub highlight" style="${subDisplay}"><div class="chev"></div><div class="name">WF Formalizado</div><div class="n">${wfFormalizado.toLocaleString('es-PE')}</div><div class="p">${pct(wfFormalizado,total)}%</div></div>
-    <div class="frow bad-row"><div class="chev"></div><div class="name">RECHAZADA</div><div class="n">${rechazada.toLocaleString('es-PE')}</div><div class="p">${pct(rechazada,total)}%</div></div>
-    <div class="frow warn-row"><div class="chev"></div><div class="name">OBSERVADA</div><div class="n">${observada.toLocaleString('es-PE')}</div><div class="p">${pct(observada,total)}%</div></div>
-    <div class="frow"><div class="chev"></div><div class="name">PENDIENTE</div><div class="n">${pendiente.toLocaleString('es-PE')}</div><div class="p">${pct(pendiente,total)}%</div></div>
-    <div class="frow total"><div class="chev"></div><div class="name">Total general</div><div class="n">${total.toLocaleString('es-PE')}</div><div class="p">100.00%</div></div>
-  `;
-  document.getElementById('funnelToggle').addEventListener('click', ()=>{ funnelExpanded=!funnelExpanded; renderFunnel(getFiltered()); });
+  let html = '';
+  groups.forEach(g=>{
+    const hasSubs = g.subs && g.subs.length>0;
+    const expanded = !!funnelState[g.key];
+    const chev = hasSubs ? (expanded?'▾':'▸') : '';
+    const rowClass = g.rowClass + (hasSubs?' has-toggle':'');
+    html += `<div class="frow ${rowClass}" data-toggle="${g.key}"><div class="chev">${chev}</div><div class="name">${g.key}</div><div class="n">${g.n.toLocaleString('es-PE')}</div><div class="p">${pct(g.n,total)}%</div></div>`;
+    if(hasSubs && expanded){
+      g.subs.forEach(s=>{
+        html += `<div class="frow sub${s.highlight?' highlight':''}"><div class="chev"></div><div class="name">${s.name}</div><div class="n">${s.n.toLocaleString('es-PE')}</div><div class="p">${pct(s.n,total)}%</div></div>`;
+      });
+    }
+  });
+  html += `<div class="frow total"><div class="chev"></div><div class="name">Total general</div><div class="n">${total.toLocaleString('es-PE')}</div><div class="p">100.00%</div></div>`;
+  el.innerHTML = html;
+
+  el.querySelectorAll('.frow.has-toggle').forEach(row=>{
+    row.addEventListener('click', ()=>{
+      const key = row.getAttribute('data-toggle');
+      funnelState[key] = !funnelState[key];
+      renderFunnel(getFiltered());
+    });
+  });
 }
 
 function destroyChart(key){ if(charts[key]){ charts[key].destroy(); delete charts[key]; } }
