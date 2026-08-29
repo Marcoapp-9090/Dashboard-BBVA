@@ -707,7 +707,8 @@ function renderAvanceValidador(data){
 }
 
 function renderHeatmap(data){
-  const days = [...new Set(data.map(r=>r.f_venta).filter(Boolean))].sort();
+  const validaConHora = data.filter(r=>r.resultado==='VALIDA' && r.hora!==null && r.f_venta);
+  const days = [...new Set(validaConHora.map(r=>r.f_venta))].sort();
   if(!days.includes(heatmapDay)) heatmapDay = days.length ? days[days.length-1] : null;
 
   const barEl = document.getElementById('heatmapDayBar');
@@ -720,7 +721,7 @@ function renderHeatmap(data){
     b.addEventListener('click', ()=>{ heatmapDay = b.getAttribute('data-day'); render(); });
   });
 
-  const dayData = heatmapDay ? data.filter(r=>r.f_venta===heatmapDay && r.resultado==='VALIDA') : [];
+  const dayData = heatmapDay ? validaConHora.filter(r=>r.f_venta===heatmapDay) : [];
   const validadores = [...new Set(dayData.map(r=>r.validador).filter(Boolean))].sort();
   const horas = [...new Set(dayData.map(r=>r.hora).filter(h=>h!==null))].sort((a,b)=>a-b);
 
