@@ -111,6 +111,18 @@
   .daybtn:hover{border-color:var(--blue);}
   .daybtn.active{background:var(--blue); color:#fff; border-color:var(--blue);}
 
+  tbody tr.main-row{cursor:pointer;}
+  tbody tr.main-row td:first-child{font-weight:700; color:var(--navy);}
+  tbody tr.main-row:hover td{background:var(--accent-soft);}
+  tr.sub-row td{background:#fbfcfe; color:var(--ink-soft); font-size:11.5px; padding:6px 10px 6px 26px;}
+  td.zero{color:var(--ink-mute);}
+  td.errnum{font-weight:800; color:var(--bad);}
+  .eff-cell{display:flex; align-items:center; gap:8px; justify-content:flex-end;}
+  .eff-track{width:56px; height:6px; background:var(--line); border-radius:4px; overflow:hidden; flex-shrink:0;}
+  .eff-fill{height:100%; border-radius:4px;}
+  .eff-val{font-weight:800; min-width:50px; text-align:right;}
+  .tchev{display:inline-block; width:14px; font-size:10px; color:var(--blue);}
+
   footer{text-align:center; font-size:11px; color:var(--ink-mute); margin-top:1rem; padding-bottom:1rem;}
 
   @media (max-width:900px){
@@ -227,6 +239,23 @@
         </div>
       </div>
 
+      <div class="kpis" id="efKpiRow" style="grid-template-columns:repeat(3,1fr);"></div>
+      <div class="panel" style="margin-bottom:14px;">
+        <div class="panel-head"><h3>Errores del equipo por categoría</h3></div>
+        <p class="desc" style="font-size:11px; color:var(--ink-mute); margin:-8px 0 12px;">Acumulado de todos los validadores — cuenta cada devolución del historial, no solo la última</p>
+        <div class="chartbox" style="height:200px;"><canvas id="chartErrCategoria"></canvas></div>
+      </div>
+      <div class="panel" style="margin-bottom:14px;">
+        <div class="panel-head"><h3>Efectividad y errores imputables por validador</h3></div>
+        <p class="desc" style="font-size:11px; color:var(--ink-mute); margin:-8px 0 12px;">Clic en un validador para ver en qué categoría se concentran sus errores</p>
+        <div class="table-scroll">
+          <table id="tblEfectividad">
+            <thead><tr><th style="text-align:left;">Validador</th><th>Gestionado</th><th>Total errores</th><th style="text-align:right;">Efectividad</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
       <div class="panel" style="margin-bottom:14px;">
         <div class="panel-head"><h3>Ventas validadas por hora, por validador</h3></div>
         <div class="daybar" id="heatmapDayBar"></div>
@@ -296,6 +325,8 @@ const MOTIVO_CATALOGO = [
   ['SIN OFERTA','Sin oferta MOI'],
   ['OFERTA EN VUELO','Oferta en vuelo'],
   ['LINEA DE CREDITO','Por línea de crédito'],
+  ['INGRESOS INFERIORES','Ingresos inferiores'],
+  ['CANAL VENTA','Canal de venta'],
   ['SIN LLENAR','Error de llenado WF'],
   ['LLENADO','Error de llenado WF'],
   ['ESTADO CIVIL','Estado civil'],
@@ -309,8 +340,18 @@ const MOTIVO_CATALOGO = [
   ['DUPLICAD','Venta duplicada'],
   ['RENIEC','Datos no coinciden con RENIEC'],
 ];
-// Motivos NO imputables al validador (responsabilidad del banco / cliente / oferta)
-const MOTIVOS_NO_IMPUTABLES = ['Sin oferta MOI','Oferta en vuelo','Estado civil'];
+// Motivos NO imputables al validador (responsabilidad del banco / cliente / oferta) - segun clasificacion "Errores Everis"
+const MOTIVOS_NO_IMPUTABLES = ['Sin oferta MOI','Oferta en vuelo','Estado civil','Por línea de crédito','Por tipo de TC','Datos no coinciden con RENIEC','Sin motivo registrado','Venta duplicada','Límite mínimo de contrato'];
+// Categorias imputables al validador, para el panel de efectividad
+const CATEGORIA_ERROR = {
+  'Error de llenado WF': 'Datos difiere / en blanco',
+  'Dependiente misma dirección': 'Llenado ficha',
+  'Modalidad laboral no coincide': 'Llenado ficha',
+  'Ingresos inferiores': 'Llenado ficha',
+  'Canal de venta': 'Canal de venta',
+  'Correo electrónico inválido': 'Datos difiere / en blanco',
+  'Datos incompletos': 'Datos difiere / en blanco',
+};
 
 const MOTIVO_OBS_CATALOGO = [
   ['NO MENCIONA','EEVV no menciona información obligatoria'],
@@ -426,19 +467,22 @@ function homologar(texto, catalogo, fallback){
 }
 
 function extraerMotivoYIntentos(texto){
-  if(!texto) return {motivo:null, intentos:0, fecha:null};
+  if(!texto) return {motivo:null, intentos:0, fecha:null, historial:[]};
   const t = String(texto);
   const re = /(\d{1,2}\/\d{1,2}\/\d{4})\s+\d{2}:\d{2}:\d{2}\s+MOTIVO RECHAZO\s*\/\s*MOTIVO DEVOLUCION\s*:\s*([^\n]{1,200}?)(?=\s*\d{1,2}\/\d{1,2}\/\d{2,4}|\s*$)/g;
   let match, best=null, count=0;
+  const historial=[];
   while((match = re.exec(t)) !== null){
     count++;
     const fecha = parseFecha(match[1]);
     const texto2 = match[2].trim();
+    const motivoEv = homologar(texto2, MOTIVO_CATALOGO, 'Sin motivo registrado');
+    historial.push({fecha: fecha?isoDay(fecha):null, motivo: motivoEv});
     if(!best || (fecha && best.fecha && fecha > best.fecha) || (fecha && !best.fecha)) best = {fecha, texto:texto2};
   }
-  if(!best) return {motivo:null, intentos:count, fecha:null};
+  if(!best) return {motivo:null, intentos:count, fecha:null, historial};
   const motivoCorto = homologar(best.texto, MOTIVO_CATALOGO, 'Sin motivo registrado');
-  return {motivo:motivoCorto, intentos:count, fecha: best.fecha ? isoDay(best.fecha) : null};
+  return {motivo:motivoCorto, intentos:count, fecha: best.fecha ? isoDay(best.fecha) : null, historial};
 }
 
 function parseRows(rows, canal){
@@ -467,7 +511,8 @@ function parseRows(rows, canal){
       motivoObs,
       motivoDevuelta: wfInfo.motivo,
       fechaDevolucion: wfInfo.fecha,
-      intentos: wfInfo.intentos
+      intentos: wfInfo.intentos,
+      historialErrores: wfInfo.historial
     };
   }).filter(r=> r.ejecutivo !== 'SIN ASIGNAR' || r.validador);
 }
@@ -623,6 +668,7 @@ function render(){
   } else if(currentView==='mc'){
     renderMcKPIs(data);
     renderAvanceValidador(data);
+    renderEfectividad(data);
     renderHeatmap(data);
     renderPendientes(data);
     renderDevValidador(data);
@@ -866,6 +912,75 @@ function renderAvanceValidador(data){
       '<td>'+cell(v.rechazadas,v.total,false)+'</td>'+
       '<td>'+cell(v.devueltas,v.total,false)+'</td></tr>';
   }).join('') || '<tr><td colspan="6" style="text-align:center; color:var(--ink-mute);">Sin datos</td></tr>';
+}
+
+let efectividadState = {};
+function renderEfectividad(data){
+  const byVal = {};
+  const catTotals = {};
+  data.forEach(r=>{
+    const key = r.validador || '';
+    if(!key) return;
+    byVal[key] = byVal[key] || {gestionado:0, errores:0, cats:{}};
+    byVal[key].gestionado++;
+    (r.historialErrores||[]).forEach(ev=>{
+      const cat = CATEGORIA_ERROR[ev.motivo];
+      if(!cat) return;
+      byVal[key].errores++;
+      byVal[key].cats[cat] = (byVal[key].cats[cat]||0)+1;
+      catTotals[cat] = (catTotals[cat]||0)+1;
+    });
+  });
+
+  const totalErrores = Object.values(catTotals).reduce((a,b)=>a+b,0);
+  const totalGestionado = Object.values(byVal).reduce((a,b)=>a+b.gestionado,0);
+  const efectividadEquipo = totalGestionado? Math.round((1-totalErrores/totalGestionado)*10000)/100 : 100;
+  const catEntries = Object.entries(catTotals).sort((a,b)=>b[1]-a[1]);
+  const catTop = catEntries[0];
+  document.getElementById('efKpiRow').innerHTML = [
+    {label:'Errores imputables', val:totalErrores.toLocaleString('es-PE'), sub:'de '+totalGestionado.toLocaleString('es-PE')+' ventas gestionadas', cls:'', size:'21px'},
+    {label:'Efectividad del equipo', val:efectividadEquipo+'%', sub:'promedio del periodo filtrado', cls:'aqua', size:'21px'},
+    {label:'Categoría más frecuente', val: catTop?catTop[0]:'—', sub: catTop? (catTop[1]+' de '+totalErrores+' errores') : 'sin errores', cls:'warn', size:'15px'}
+  ].map(i=>'<div class="kpi '+i.cls+'"><div class="label">'+i.label+'</div><div class="val" style="font-size:'+i.size+';">'+i.val+'</div><div class="sub">'+i.sub+'</div></div>').join('');
+
+  destroyChart('errCategoria');
+  charts.errCategoria = new Chart(document.getElementById('chartErrCategoria'), {
+    type:'bar',
+    data:{labels:catEntries.map(e=>e[0]), datasets:[{data:catEntries.map(e=>e[1]), backgroundColor:BLUE, labelColor:'#04213d', borderRadius:4, maxBarThickness:22}]},
+    options:{
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{x:{beginAtZero:true, ticks:{precision:0}}, y:{ticks:{font:{size:11}}}}
+    }
+  });
+
+  const rows = Object.entries(byVal).sort((a,b)=>b[1].errores-a[1].errores || b[1].gestionado-a[1].gestionado);
+  const tbody = document.querySelector('#tblEfectividad tbody');
+  let html = '';
+  rows.forEach(([name,v])=>{
+    const eff = v.gestionado? Math.round((1-v.errores/v.gestionado)*10000)/100 : 100;
+    const color = eff>=99?AQUA:(eff>=97?AMBER:RED);
+    const hasErrors = v.errores>0;
+    const chev = hasErrors ? (efectividadState[name]?'▾':'▸') : '';
+    html += '<tr class="main-row'+(hasErrors?' has-toggle':'')+'" data-val="'+name.replace(/"/g,'&quot;')+'">'+
+      '<td><span class="tchev">'+chev+'</span>'+formatNombre(name)+'</td>'+
+      '<td>'+v.gestionado.toLocaleString('es-PE')+'</td>'+
+      '<td class="'+(hasErrors?'errnum':'zero')+'">'+v.errores+'</td>'+
+      '<td><div class="eff-cell"><div class="eff-track"><div class="eff-fill" style="width:'+eff+'%; background:'+color+';"></div></div><span class="eff-val">'+eff+'%</span></div></td></tr>';
+    if(hasErrors && efectividadState[name]){
+      Object.entries(v.cats).sort((a,b)=>b[1]-a[1]).forEach(([cat,n])=>{
+        html += '<tr class="sub-row"><td>'+cat+'</td><td></td><td>'+n+'</td><td></td></tr>';
+      });
+    }
+  });
+  tbody.innerHTML = html || '<tr><td colspan="4" style="text-align:center; color:var(--ink-mute);">Sin datos</td></tr>';
+  tbody.querySelectorAll('tr.main-row.has-toggle').forEach(row=>{
+    row.addEventListener('click', ()=>{
+      const key = row.getAttribute('data-val');
+      efectividadState[key] = !efectividadState[key];
+      renderEfectividad(getFiltered());
+    });
+  });
 }
 
 function renderHeatmap(data){
