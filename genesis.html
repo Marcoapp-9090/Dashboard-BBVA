@@ -122,6 +122,7 @@
   .eff-fill{height:100%; border-radius:4px;}
   .eff-val{font-weight:800; min-width:50px; text-align:right;}
   .tchev{display:inline-block; width:14px; font-size:10px; color:var(--blue);}
+  .total-pill{display:inline-flex; align-items:center; justify-content:center; min-width:34px; padding:3px 10px; border-radius:20px; font-weight:800; font-size:12.5px;}
 
   footer{text-align:center; font-size:11px; color:var(--ink-mute); margin-top:1rem; padding-bottom:1rem;}
 
@@ -282,6 +283,16 @@
               <tbody></tbody>
             </table>
           </div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-bottom:14px;">
+        <div class="panel-head"><h3>Total errores por validador</h3></div>
+        <div class="table-scroll">
+          <table id="tblTotalErroresValidador">
+            <thead><tr><th style="text-align:left;">Validador</th><th>Datos difiere o en blanco</th><th>Llenado ficha</th><th>Canal de venta</th><th>Total</th></tr></thead>
+            <tbody></tbody>
+          </table>
         </div>
       </div>
       <footer>BBVA Perú · Mesa de Control de validadores</footer>
@@ -672,6 +683,7 @@ function render(){
     renderHeatmap(data);
     renderPendientes(data);
     renderDevValidador(data);
+    renderTotalErroresValidador(data);
   } else {
     renderAsesorTable(data);
     renderAsesorObsRanking();
@@ -1091,6 +1103,33 @@ function descargarCSV(rows, header, filename){
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+function renderTotalErroresValidador(data){
+  const byVal = {};
+  data.forEach(r=>{
+    const key = r.validador || '';
+    if(!key) return;
+    byVal[key] = byVal[key] || {'Datos difiere / en blanco':0,'Llenado ficha':0,'Canal de venta':0, total:0};
+    (r.historialErrores||[]).forEach(ev=>{
+      const cat = CATEGORIA_ERROR[ev.motivo];
+      if(!cat) return;
+      byVal[key][cat] = (byVal[key][cat]||0)+1;
+      byVal[key].total++;
+    });
+  });
+  const rows = Object.entries(byVal).sort((a,b)=>b[1].total-a[1].total);
+  const tbody = document.querySelector('#tblTotalErroresValidador tbody');
+  const totals = {'Datos difiere / en blanco':0,'Llenado ficha':0,'Canal de venta':0, total:0};
+  rows.forEach(([,v])=>{ totals['Datos difiere / en blanco']+=v['Datos difiere / en blanco']; totals['Llenado ficha']+=v['Llenado ficha']; totals['Canal de venta']+=v['Canal de venta']; totals.total+=v.total; });
+  const pillFor = n => {
+    const cls = n===0 ? 'ok' : (n<=2 ? 'warn' : 'bad');
+    return '<span class="total-pill" style="background:var(--'+(cls==='ok'?'aqua-soft':cls==='warn'?'warn-soft':'bad-soft')+'); color:var(--'+(cls==='ok'?'aqua':cls)+');">'+n+'</span>';
+  };
+  tbody.innerHTML = (rows.length ? rows.map(([name,v])=>
+    '<tr><td>'+formatNombre(name)+'</td><td>'+v['Datos difiere / en blanco']+'</td><td>'+v['Llenado ficha']+'</td><td>'+v['Canal de venta']+'</td><td>'+pillFor(v.total)+'</td></tr>'
+  ).join('') : '<tr><td colspan="5" style="text-align:center; color:var(--ink-mute);">Sin datos</td></tr>')
+  + '<tr class="total-row"><td>Total general</td><td>'+totals['Datos difiere / en blanco']+'</td><td>'+totals['Llenado ficha']+'</td><td>'+totals['Canal de venta']+'</td><td>'+totals.total+'</td></tr>';
 }
 
 function descargarDevueltasMC(){
