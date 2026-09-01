@@ -121,6 +121,33 @@
   .eff-fill{height:100%; border-radius:4px;}
   .eff-val{font-weight:800; min-width:50px; text-align:right;}
   .tchev{display:inline-block; width:14px; font-size:10px; color:var(--blue);}
+  .total-pill{display:inline-flex; align-items:center; justify-content:center; min-width:34px; padding:3px 10px; border-radius:20px; font-weight:800; font-size:12.5px;}
+
+  .section-title{font-size:12px; font-weight:800; color:var(--blue); text-transform:uppercase; letter-spacing:.05em; margin:22px 0 10px; display:flex; align-items:center; gap:8px;}
+  .section-title::after{content:''; flex:1; height:1px; background:var(--line);}
+  thead tr.grp th{background:var(--accent-soft); color:var(--blue); font-size:9.5px; text-transform:uppercase; letter-spacing:.06em; font-weight:800; padding:8px 8px 6px; border-bottom:2px solid var(--blue-light); text-align:center;}
+  thead tr.grp th:first-child{background:transparent; border-bottom:2px solid transparent;}
+  thead tr.grp th.g-aperturada, thead tr.grp th.g-sinaperturar{border-right:1px solid rgba(255,255,255,.5);}
+  thead tr.cols th{background:var(--navy); color:#fff; padding:8px 10px; font-size:10.5px; border-right:1px solid rgba(255,255,255,.12); text-align:center;}
+  thead tr.cols th:last-child{border-right:none;}
+  thead tr.grp th:first-child, thead tr.cols th:first-child{text-align:left; padding-left:12px;}
+
+  .abonos-panel{background:linear-gradient(120deg, var(--navy), var(--blue)); border-radius:var(--radius); padding:20px 22px; color:#fff; margin-bottom:14px;}
+  .abonos-title{font-size:11.5px; text-transform:uppercase; letter-spacing:.05em; opacity:.75; font-weight:700; margin-bottom:14px;}
+  .abonos-grid{display:grid; grid-template-columns:1fr 1fr 1.3fr auto; gap:16px; align-items:end;}
+  .abonos-item .lbl{font-size:11px; opacity:.75;}
+  .abonos-item .num{font-size:22px; font-weight:800; margin-top:2px;}
+  .abonos-total{background:rgba(255,255,255,.12); border-radius:10px; padding:12px 18px; text-align:center;}
+  .abonos-total .lbl{font-size:10.5px; opacity:.85; text-transform:uppercase; letter-spacing:.04em;}
+  .abonos-total .num{font-size:26px; font-weight:800; margin-top:2px;}
+  .cosecha-input{width:90px; height:30px; border:1px solid rgba(255,255,255,.3); border-radius:6px; padding:0 8px; font-size:12.5px; background:rgba(255,255,255,.95); color:var(--ink);}
+
+  footer{text-align:center; font-size:11px; color:var(--ink-mute); margin-top:1rem; padding-bottom:1rem;}
+
+  @media (max-width:900px){
+    .kpis{grid-template-columns:repeat(2,1fr);}
+    .grid2{grid-template-columns:1fr;}
+  }
 
   footer{text-align:center; font-size:11px; color:var(--ink-mute); margin-top:1rem; padding-bottom:1rem;}
 
@@ -146,6 +173,7 @@
     <div class="tab active" data-view="global">Vista Global</div>
     <div class="tab" data-view="mc">Vista MC</div>
     <div class="tab" data-view="asesor">Vista por Asesor</div>
+    <div class="tab" data-view="respaldada">TC Respaldada</div>
   </div>
 </div>
 
@@ -266,6 +294,16 @@
           </div>
         </div>
       </div>
+
+      <div class="panel" style="margin-bottom:14px;">
+        <div class="panel-head"><h3>Total errores por validador</h3></div>
+        <div class="table-scroll">
+          <table id="tblTotalErroresValidador">
+            <thead><tr><th style="text-align:left;">Validador</th><th>Datos difiere o en blanco</th><th>Llenado ficha</th><th>Canal de venta</th><th>Total</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
       <footer>BBVA Perú · Mesa de Control de validadores</footer>
     </div>
 
@@ -292,6 +330,76 @@
       </div>
       <footer>BBVA Perú · Vista por asesor</footer>
     </div>
+
+<!-- ============ TC RESPALDADA ============ -->
+    <div id="viewRespaldada" class="hidden">
+      <div class="filters">
+        <div class="fgroup"><label>Mes</label><select id="fMesResp"><option value="">Todos</option></select></div>
+        <div class="fgroup"><label>Día</label><select id="fDiaResp"><option value="">Todos los días</option></select></div>
+        <div class="fgroup"><label>Validador</label><select id="fValidadorResp"><option value="">Todos</option></select></div>
+        <div class="spacer"></div>
+        <button class="clear" id="btnClearFiltersResp">Limpiar filtros</button>
+      </div>
+
+      <div class="kpis" id="respKpiRow"></div>
+
+      <div class="section-title">Regular</div>
+      <div class="grid2">
+        <div class="panel">
+          <div class="panel-head"><h3>Estados de Venta — Regular</h3></div>
+          <div class="funnel" id="funnelRespRegular"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Estados × Tipo de cuenta — Regular</h3></div>
+          <table id="tblCrossRegular">
+            <thead>
+              <tr class="grp"><th></th><th colspan="2" class="g-aperturada">Cuenta Aperturada</th><th colspan="2" class="g-sinaperturar">Pendiente por Aperturar</th><th colspan="2">Total</th></tr>
+              <tr class="cols"><th style="text-align:left;">Estado</th><th>OP</th><th>%</th><th>OP</th><th>%</th><th>OP</th><th>%</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section-title">Asistida</div>
+      <div class="grid2">
+        <div class="panel">
+          <div class="panel-head"><h3>Estados de Venta — Asistida</h3></div>
+          <div class="funnel" id="funnelRespAsistida"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Estados × Tipo de cuenta — Asistida</h3></div>
+          <table id="tblCrossAsistida">
+            <thead>
+              <tr class="grp"><th></th><th colspan="2" class="g-aperturada">Cuenta Aperturada</th><th colspan="2" class="g-sinaperturar">Pendiente por Aperturar</th><th colspan="2">Total</th></tr>
+              <tr class="cols"><th style="text-align:left;">Estado</th><th>OP</th><th>%</th><th>OP</th><th>%</th><th>OP</th><th>%</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section-title">Total de abonos</div>
+      <div class="abonos-panel">
+        <div class="abonos-title">Formalizado Regular + Formalizado Asistida + Cosecha (mes anterior)</div>
+        <div class="abonos-grid">
+          <div class="abonos-item"><div class="lbl">Regular formalizado</div><div class="num" id="abonoRegular">—</div><div class="lbl" id="abonoRegularSub" style="margin-top:6px;"></div></div>
+          <div class="abonos-item"><div class="lbl">Asistida formalizado</div><div class="num" id="abonoAsistida">—</div><div class="lbl" id="abonoAsistidaSub" style="margin-top:6px;"></div></div>
+          <div class="abonos-item">
+            <div class="lbl">Cosecha mes anterior <span id="cosechaLabel"></span></div>
+            <div style="display:flex; gap:6px; margin-top:4px;">
+              <input type="number" id="cosechaAperturada" class="cosecha-input" placeholder="Aperturada" disabled>
+              <input type="number" id="cosechaSinAperturar" class="cosecha-input" placeholder="Sin aperturar" disabled>
+            </div>
+            
+          </div>
+          <div class="abonos-total"><div class="lbl">Total de abonos</div><div class="num" id="abonoTotal">—</div></div>
+        </div>
+      </div>
+
+      <footer>BBVA Perú · TC Respaldada</footer>
+    </div>
+
 
   </div>
 </div>
@@ -401,6 +509,8 @@ const MOTIVO_OBS_CATALOGO = [
 
 let TLM_RECORDS = [];
 let WEB_RECORDS = [];
+let RESP_RECORDS = [];
+let ASISTIDA_DNIS = new Set();
 let RECORDS = [];
 let charts = {};
 let currentView = 'global';
@@ -499,6 +609,31 @@ function parseRows(rows, canal){
   }).filter(r=> r.ejecutivo !== 'SIN ASIGNAR' || r.validador);
 }
 
+function parseRespaldadaRows(rows){
+  return rows.map(r=>{
+    const fv = parseFecha(r.F_VENTA);
+    const fg = parseFecha(r.FECHA_GESTION);
+    const resultado = (r.V_CANTADAS||'').toString().trim().toUpperCase();
+    return {
+      dni: (r.DNI||'').toString().trim(),
+      ejecutivo: (r.EJECUTIVO||'').toString().trim().toUpperCase() || 'SIN ASIGNAR',
+      validador: (r.VALIDADOR||'').toString().trim().toUpperCase(),
+      f_venta: fv ? isoDay(fv) : null,
+      mes: fv ? yearMonth(fv) : null,
+      fechaGestionDia: fg ? isoDay(fg) : null,
+      hora: parseHora(r.FECHA_GESTION),
+      resultado,
+      estadoWF: (r.DETALLE||'').toString().trim().toUpperCase(),
+      motivoRO: (r.ESTADO||'').toString().trim().toUpperCase(),
+      apertura: (r.Apertura||'').toString().trim()
+    };
+  }).filter(r=> r.resultado && r.resultado!=='PENDIENTE');
+}
+
+function parseAsistidasDnis(rows){
+  return [...new Set(rows.map(r=>(r.DNI||'').toString().trim()).filter(Boolean))];
+}
+
 function saveLocal(key, records, fileName){
   try{ localStorage.setItem(key, JSON.stringify({fileName, uploadedAt:new Date().toISOString(), records})); }catch(err){ console.error(err); }
 }
@@ -520,6 +655,16 @@ document.getElementById('btnClearFilters').addEventListener('click', ()=>{
     render();
   });
 });
+document.getElementById('btnClearFiltersResp').addEventListener('click', ()=>{
+  ['fMesResp','fDiaResp','fValidadorResp'].forEach(id=>document.getElementById(id).value='');
+  render();
+});
+['fMesResp','fDiaResp','fValidadorResp'].forEach(id=>{
+  document.getElementById(id).addEventListener('change', ()=>{
+    if(id==='fMesResp') buildDiaOptionsResp();
+    render();
+  });
+});
 document.querySelectorAll('.tab').forEach(t=>{
   t.addEventListener('click', ()=>{
     currentView = t.getAttribute('data-view');
@@ -528,6 +673,7 @@ document.querySelectorAll('.tab').forEach(t=>{
     document.getElementById('viewGlobal').classList.toggle('hidden', currentView!=='global');
     document.getElementById('viewMC').classList.toggle('hidden', currentView!=='mc');
     document.getElementById('viewAsesor').classList.toggle('hidden', currentView!=='asesor');
+    document.getElementById('viewRespaldada').classList.toggle('hidden', currentView!=='respaldada');
     render();
   });
 });
@@ -553,11 +699,22 @@ async function loadPublished(){
       WEB_RECORDS = payload.web.records;
       got = true;
     }
+    if(payload.resp && payload.resp.records && payload.resp.records.length){
+      RESP_RECORDS = payload.resp.records;
+      got = true;
+    }
+    if(payload.asist && payload.asist.records && payload.asist.records.length){
+      ASISTIDA_DNIS = new Set(payload.asist.records);
+    }
+    if(payload.cosecha){
+      try{ localStorage.setItem('bbva_cosecha', JSON.stringify(payload.cosecha)); }catch(e){}
+    }
     RECORDS = TLM_RECORDS.concat(WEB_RECORDS);
     if(got){
       document.getElementById('emptyState').classList.add('hidden');
       document.getElementById('dashboard').classList.remove('hidden');
       buildFilterOptions();
+      buildFilterOptionsResp();
       render();
       const fecha = payload.publishedAt ? new Date(payload.publishedAt).toLocaleString('es-PE') : '';
       statusEl.textContent = 'Última actualización: '+fecha;
@@ -611,6 +768,31 @@ function getFilteredHistorico(){
   return RECORDS.filter(r=> (!canal || r.canal===canal) && (!va || r.validador===va));
 }
 
+function buildFilterOptionsResp(){
+  const meses=[...new Set(RESP_RECORDS.map(r=>r.mes).filter(Boolean))].sort();
+  const validadores=[...new Set(RESP_RECORDS.map(r=>r.validador).filter(Boolean))].sort();
+  fillSelect('fMesResp', meses, mesLabel);
+  fillSelect('fValidadorResp', validadores, formatNombre);
+  buildDiaOptionsResp();
+}
+function buildDiaOptionsResp(){
+  const mes = document.getElementById('fMesResp').value;
+  const dias = [...new Set(RESP_RECORDS.filter(r=>!mes || r.mes===mes).map(r=>r.f_venta).filter(Boolean))].sort();
+  fillSelect('fDiaResp', dias, diaLabel);
+}
+function getFilteredResp(){
+  const mes=document.getElementById('fMesResp').value;
+  const dia=document.getElementById('fDiaResp').value;
+  const va=document.getElementById('fValidadorResp').value;
+  return RESP_RECORDS.filter(r=> (!mes || r.mes===mes) && (!dia || r.f_venta===dia) && (!va || r.validador===va));
+}
+function getCosecha(){
+  try{
+    const raw = localStorage.getItem('bbva_cosecha');
+    return raw? JSON.parse(raw) : {aperturada:0, sinAperturar:0};
+  }catch(e){ return {aperturada:0, sinAperturar:0}; }
+}
+
 function render(){
   const data = getFiltered();
   if(currentView==='global'){
@@ -627,9 +809,12 @@ function render(){
     renderHeatmap(data);
     renderPendientes(data);
     renderDevValidador(data);
-  } else {
+    renderTotalErroresValidador(data);
+  } else if(currentView==='asesor'){
     renderAsesorTable(data);
     renderAsesorObsRanking();
+  } else {
+    renderRespaldada();
   }
 }
 
@@ -1048,6 +1233,33 @@ function descargarCSV(rows, header, filename){
   URL.revokeObjectURL(url);
 }
 
+function renderTotalErroresValidador(data){
+  const byVal = {};
+  data.forEach(r=>{
+    const key = r.validador || '';
+    if(!key) return;
+    byVal[key] = byVal[key] || {'Datos difiere / en blanco':0,'Llenado ficha':0,'Canal de venta':0, total:0};
+    (r.historialErrores||[]).forEach(ev=>{
+      const cat = CATEGORIA_ERROR[ev.motivo];
+      if(!cat) return;
+      byVal[key][cat] = (byVal[key][cat]||0)+1;
+      byVal[key].total++;
+    });
+  });
+  const rows = Object.entries(byVal).sort((a,b)=>b[1].total-a[1].total);
+  const tbody = document.querySelector('#tblTotalErroresValidador tbody');
+  const totals = {'Datos difiere / en blanco':0,'Llenado ficha':0,'Canal de venta':0, total:0};
+  rows.forEach(([,v])=>{ totals['Datos difiere / en blanco']+=v['Datos difiere / en blanco']; totals['Llenado ficha']+=v['Llenado ficha']; totals['Canal de venta']+=v['Canal de venta']; totals.total+=v.total; });
+  const pillFor = n => {
+    const cls = n===0 ? 'ok' : (n<=2 ? 'warn' : 'bad');
+    return '<span class="total-pill" style="background:var(--'+(cls==='ok'?'aqua-soft':cls==='warn'?'warn-soft':'bad-soft')+'); color:var(--'+(cls==='ok'?'aqua':cls)+');">'+n+'</span>';
+  };
+  tbody.innerHTML = (rows.length ? rows.map(([name,v])=>
+    '<tr><td>'+formatNombre(name)+'</td><td>'+v['Datos difiere / en blanco']+'</td><td>'+v['Llenado ficha']+'</td><td>'+v['Canal de venta']+'</td><td>'+pillFor(v.total)+'</td></tr>'
+  ).join('') : '<tr><td colspan="5" style="text-align:center; color:var(--ink-mute);">Sin datos</td></tr>')
+  + '<tr class="total-row"><td>Total general</td><td>'+totals['Datos difiere / en blanco']+'</td><td>'+totals['Llenado ficha']+'</td><td>'+totals['Canal de venta']+'</td><td>'+totals.total+'</td></tr>';
+}
+
 function descargarDevueltasMC(){
   const rows = getDevueltasMCData().map(r=>[
     r.dni, formatNombre(r.validador), r.motivoDevuelta, r.canal, r.fechaDevolucion?diaLabel(r.fechaDevolucion):''
@@ -1108,6 +1320,112 @@ const GH_OWNER = 'marcoapp-9090';
 const GH_REPO = 'Dashboard-BBVA';
 const GH_BRANCH = 'main';
 const GH_DATA_PATH = 'data.json';
+
+/* ============ TC RESPALDADA ============ */
+
+function frowHtml(cls, name, n, total, chev){
+  return '<div class="frow '+cls+'"><div class="chev">'+(chev?'▾':'')+'</div><div class="name">'+name+'</div><div class="n">'+n.toLocaleString('es-PE')+'</div><div class="p">'+pct(n,total)+'%</div></div>';
+}
+function frowSubHtml(name, n, total, hl){
+  return '<div class="frow sub'+(hl?' highlight':'')+'"><div class="chev"></div><div class="name">'+name+'</div><div class="n">'+n.toLocaleString('es-PE')+'</div><div class="p">'+pct(n,total)+'%</div></div>';
+}
+
+function renderFunnelResp(elId, subset){
+  const total = subset.length;
+  const valida = subset.filter(r=>r.resultado==='VALIDA');
+  const presentado = valida.filter(r=>r.estadoWF==='WF PRESENTADO').length;
+  const formalizado = valida.filter(r=>r.estadoWF==='WF FORMALIZADO').length;
+  const observada = subset.filter(r=>r.resultado==='OBSERVADA').length;
+  const porDigitar = subset.filter(r=>r.resultado==='POR DIGITAR').length;
+  const rechazada = subset.filter(r=>r.resultado==='RECHAZADA');
+  const rechCounts = {};
+  rechazada.forEach(r=>{ const m = r.motivoRO || 'SIN MOTIVO'; rechCounts[m]=(rechCounts[m]||0)+1; });
+  const rechSubs = Object.entries(rechCounts).sort((a,b)=>b[1]-a[1]);
+
+  let html = frowHtml('lvl1', 'VALIDA', valida.length, total, true);
+  [{name:'WF Presentado', n:presentado, hl:false},{name:'WF Formalizado', n:formalizado, hl:true}]
+    .sort((a,b)=>b.n-a.n).forEach(s=>{ html += frowSubHtml(s.name, s.n, total, s.hl); });
+  if(observada>0) html += frowHtml('warn-row','OBSERVADA', observada, total, false);
+  if(porDigitar>0) html += frowHtml('', 'POR DIGITAR', porDigitar, total, false);
+  if(rechazada.length>0){
+    html += frowHtml('bad-row','RECHAZADA', rechazada.length, total, true);
+    rechSubs.forEach(([name,n])=>{ html += frowSubHtml(name, n, total, false); });
+  }
+  html += '<div class="frow total"><div class="chev"></div><div class="name">Total general</div><div class="n">'+total.toLocaleString('es-PE')+'</div><div class="p">100.00%</div></div>';
+  const el = document.getElementById(elId);
+  if(el) el.innerHTML = total>0 ? html : '<p style="color:var(--ink-mute); font-size:12.5px; text-align:center; padding:20px 0;">Sin datos</p>';
+}
+
+function renderCrossTabResp(tableId, subset){
+  const states = [
+    {label:'VALIDA', filter:r=>r.resultado==='VALIDA'},
+    {label:'WF Presentado', filter:r=>r.estadoWF==='WF PRESENTADO'},
+    {label:'WF Formalizado', filter:r=>r.estadoWF==='WF FORMALIZADO'},
+    {label:'OBSERVADA', filter:r=>r.resultado==='OBSERVADA'},
+    {label:'POR DIGITAR', filter:r=>r.resultado==='POR DIGITAR'},
+    {label:'RECHAZADA', filter:r=>r.resultado==='RECHAZADA'}
+  ];
+  const totalAp = subset.filter(r=>r.apertura==='Cuenta Aperturada').length;
+  const totalSin = subset.filter(r=>r.apertura==='Pendiente por Aperturar').length;
+  const totalGen = subset.length;
+  let rows = '';
+  states.forEach(s=>{
+    const rowsSub = subset.filter(s.filter);
+    if(rowsSub.length===0 && s.label!=='VALIDA' && s.label!=='WF Formalizado') return;
+    const ap = rowsSub.filter(r=>r.apertura==='Cuenta Aperturada').length;
+    const sin = rowsSub.filter(r=>r.apertura==='Pendiente por Aperturar').length;
+    const tot = rowsSub.length;
+    rows += '<tr><td>'+s.label+'</td><td>'+ap+'</td><td>'+pct(ap,totalAp)+'%</td><td>'+sin+'</td><td>'+pct(sin,totalSin)+'%</td><td>'+tot+'</td><td>'+pct(tot,totalGen)+'%</td></tr>';
+  });
+  rows += '<tr class="total-row"><td>Total general</td><td>'+totalAp+'</td><td>100%</td><td>'+totalSin+'</td><td>100%</td><td>'+totalGen+'</td><td>100%</td></tr>';
+  const tbody = document.querySelector('#'+tableId+' tbody');
+  if(tbody) tbody.innerHTML = rows;
+}
+
+function renderAbonos(formRegular, formAsistida){
+  const regAp = formRegular.filter(r=>r.apertura==='Cuenta Aperturada').length;
+  const regSin = formRegular.filter(r=>r.apertura==='Pendiente por Aperturar').length;
+  const asiAp = formAsistida.filter(r=>r.apertura==='Cuenta Aperturada').length;
+  const asiSin = formAsistida.filter(r=>r.apertura==='Pendiente por Aperturar').length;
+  document.getElementById('abonoRegular').textContent = formRegular.length.toLocaleString('es-PE');
+  document.getElementById('abonoRegularSub').textContent = regAp+' aperturada + '+regSin+' sin aperturar';
+  document.getElementById('abonoAsistida').textContent = formAsistida.length.toLocaleString('es-PE');
+  document.getElementById('abonoAsistidaSub').textContent = asiAp+' aperturada + '+asiSin+' sin aperturar';
+
+  const cosecha = getCosecha();
+  document.getElementById('cosechaAperturada').value = cosecha.aperturada || '';
+  document.getElementById('cosechaSinAperturar').value = cosecha.sinAperturar || '';
+
+  const cosechaTotal = (cosecha.aperturada||0) + (cosecha.sinAperturar||0);
+  const totalAbonos = formRegular.length + formAsistida.length + cosechaTotal;
+  document.getElementById('abonoTotal').textContent = totalAbonos.toLocaleString('es-PE');
+}
+
+function renderRespaldada(){
+  const data = getFilteredResp();
+  const regular = data.filter(r=> !ASISTIDA_DNIS.has(r.dni));
+  const asistida = data.filter(r=> ASISTIDA_DNIS.has(r.dni));
+
+  const totalGestionado = data.length;
+  const formTotal = data.filter(r=>r.estadoWF==='WF FORMALIZADO').length;
+  const formRegular = regular.filter(r=>r.estadoWF==='WF FORMALIZADO');
+  const formAsistida = asistida.filter(r=>r.estadoWF==='WF FORMALIZADO');
+  const formAperturada = data.filter(r=>r.estadoWF==='WF FORMALIZADO' && r.apertura==='Cuenta Aperturada').length;
+  const validaTotal = data.filter(r=>r.resultado==='VALIDA').length;
+
+  document.getElementById('respKpiRow').innerHTML = [
+    {label:'Total gestionado', val:totalGestionado.toLocaleString('es-PE'), sub:regular.length+' regular + '+asistida.length+' asistida', cls:''},
+    {label:'Formalizado total', val:formTotal.toLocaleString('es-PE'), sub:formRegular.length+' regular + '+formAsistida.length+' asistida', cls:'accent'},
+    {label:'% Aperturada (formalizado)', val: pct(formAperturada,formTotal)+'%', sub:formAperturada+' de '+formTotal, cls:'aqua'},
+    {label:'% Válida', val: pct(validaTotal,totalGestionado)+'%', sub:validaTotal+' de '+totalGestionado, cls:''}
+  ].map(i=>'<div class="kpi '+i.cls+'"><div class="label">'+i.label+'</div><div class="val">'+i.val+'</div><div class="sub">'+i.sub+'</div></div>').join('');
+
+  renderFunnelResp('funnelRespRegular', regular);
+  renderFunnelResp('funnelRespAsistida', asistida);
+  renderCrossTabResp('tblCrossRegular', regular);
+  renderCrossTabResp('tblCrossAsistida', asistida);
+  renderAbonos(formRegular, formAsistida);
+}
 
 loadPublished();
 </script>
