@@ -124,6 +124,25 @@
   .tchev{display:inline-block; width:14px; font-size:10px; color:var(--blue);}
   .total-pill{display:inline-flex; align-items:center; justify-content:center; min-width:34px; padding:3px 10px; border-radius:20px; font-weight:800; font-size:12.5px;}
 
+  .section-title{font-size:12px; font-weight:800; color:var(--blue); text-transform:uppercase; letter-spacing:.05em; margin:22px 0 10px; display:flex; align-items:center; gap:8px;}
+  .section-title::after{content:''; flex:1; height:1px; background:var(--line);}
+  thead tr.grp th{background:var(--accent-soft); color:var(--blue); font-size:9.5px; text-transform:uppercase; letter-spacing:.06em; font-weight:800; padding:8px 8px 6px; border-bottom:2px solid var(--blue-light); text-align:center;}
+  thead tr.grp th:first-child{background:transparent; border-bottom:2px solid transparent;}
+  thead tr.grp th.g-aperturada, thead tr.grp th.g-sinaperturar{border-right:1px solid rgba(255,255,255,.5);}
+  thead tr.cols th{background:var(--navy); color:#fff; padding:8px 10px; font-size:10.5px; border-right:1px solid rgba(255,255,255,.12); text-align:center;}
+  thead tr.cols th:last-child{border-right:none;}
+  thead tr.grp th:first-child, thead tr.cols th:first-child{text-align:left; padding-left:12px;}
+
+  .abonos-panel{background:linear-gradient(120deg, var(--navy), var(--blue)); border-radius:var(--radius); padding:20px 22px; color:#fff; margin-bottom:14px;}
+  .abonos-title{font-size:11.5px; text-transform:uppercase; letter-spacing:.05em; opacity:.75; font-weight:700; margin-bottom:14px;}
+  .abonos-grid{display:grid; grid-template-columns:1fr 1fr 1.3fr auto; gap:16px; align-items:end;}
+  .abonos-item .lbl{font-size:11px; opacity:.75;}
+  .abonos-item .num{font-size:22px; font-weight:800; margin-top:2px;}
+  .abonos-total{background:rgba(255,255,255,.12); border-radius:10px; padding:12px 18px; text-align:center;}
+  .abonos-total .lbl{font-size:10.5px; opacity:.85; text-transform:uppercase; letter-spacing:.04em;}
+  .abonos-total .num{font-size:26px; font-weight:800; margin-top:2px;}
+  .cosecha-input{width:90px; height:30px; border:1px solid rgba(255,255,255,.3); border-radius:6px; padding:0 8px; font-size:12.5px; background:rgba(255,255,255,.95); color:var(--ink);}
+
   footer{text-align:center; font-size:11px; color:var(--ink-mute); margin-top:1rem; padding-bottom:1rem;}
 
   @media (max-width:900px){
@@ -143,10 +162,16 @@
     <div class="right">
       <span class="status" id="statusTlm">TLM: sin datos</span>
       <span class="status" id="statusWeb">WEB: sin datos</span>
+      <span class="status" id="statusResp">Respaldada: sin datos</span>
+      <span class="status" id="statusAsist">Asistidas: sin datos</span>
       <button class="btn" id="btnUploadTlm">Cargar TC TLM (.xlsx)</button>
       <button class="btn" id="btnUploadWeb">Cargar TC WEB (.xlsx)</button>
+      <button class="btn" id="btnUploadResp">Cargar TC Respaldada (.xlsx)</button>
+      <button class="btn" id="btnUploadAsist">Cargar Asistidas (.xlsx)</button>
       <input type="file" id="fileInputTlm" accept=".xlsx,.xls">
       <input type="file" id="fileInputWeb" accept=".xlsx,.xls">
+      <input type="file" id="fileInputResp" accept=".xlsx,.xls">
+      <input type="file" id="fileInputAsist" accept=".xlsx,.xls">
       <button class="btn secondary hidden" id="btnClear">Borrar datos</button>
       <button class="btn secondary" id="btnConfig" title="Configurar publicación">⚙ Publicar</button>
     </div>
@@ -165,6 +190,7 @@
     <div class="tab active" data-view="global">Vista Global</div>
     <div class="tab" data-view="mc">Vista MC</div>
     <div class="tab" data-view="asesor">Vista por Asesor</div>
+    <div class="tab" data-view="respaldada">TC Respaldada</div>
   </div>
 </div>
 
@@ -322,6 +348,75 @@
       <footer>BBVA Perú · Vista por asesor</footer>
     </div>
 
+    <!-- ============ TC RESPALDADA ============ -->
+    <div id="viewRespaldada" class="hidden">
+      <div class="filters">
+        <div class="fgroup"><label>Mes</label><select id="fMesResp"><option value="">Todos</option></select></div>
+        <div class="fgroup"><label>Día</label><select id="fDiaResp"><option value="">Todos los días</option></select></div>
+        <div class="fgroup"><label>Validador</label><select id="fValidadorResp"><option value="">Todos</option></select></div>
+        <div class="spacer"></div>
+        <button class="clear" id="btnClearFiltersResp">Limpiar filtros</button>
+      </div>
+
+      <div class="kpis" id="respKpiRow"></div>
+
+      <div class="section-title">Regular</div>
+      <div class="grid2">
+        <div class="panel">
+          <div class="panel-head"><h3>Estados de Venta — Regular</h3></div>
+          <div class="funnel" id="funnelRespRegular"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Estados × Tipo de cuenta — Regular</h3></div>
+          <table id="tblCrossRegular">
+            <thead>
+              <tr class="grp"><th></th><th colspan="2" class="g-aperturada">Cuenta Aperturada</th><th colspan="2" class="g-sinaperturar">Pendiente por Aperturar</th><th colspan="2">Total</th></tr>
+              <tr class="cols"><th style="text-align:left;">Estado</th><th>OP</th><th>%</th><th>OP</th><th>%</th><th>OP</th><th>%</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section-title">Asistida</div>
+      <div class="grid2">
+        <div class="panel">
+          <div class="panel-head"><h3>Estados de Venta — Asistida</h3></div>
+          <div class="funnel" id="funnelRespAsistida"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Estados × Tipo de cuenta — Asistida</h3></div>
+          <table id="tblCrossAsistida">
+            <thead>
+              <tr class="grp"><th></th><th colspan="2" class="g-aperturada">Cuenta Aperturada</th><th colspan="2" class="g-sinaperturar">Pendiente por Aperturar</th><th colspan="2">Total</th></tr>
+              <tr class="cols"><th style="text-align:left;">Estado</th><th>OP</th><th>%</th><th>OP</th><th>%</th><th>OP</th><th>%</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section-title">Total de abonos</div>
+      <div class="abonos-panel">
+        <div class="abonos-title">Formalizado Regular + Formalizado Asistida + Cosecha (mes anterior)</div>
+        <div class="abonos-grid">
+          <div class="abonos-item"><div class="lbl">Regular formalizado</div><div class="num" id="abonoRegular">—</div><div class="lbl" id="abonoRegularSub" style="margin-top:6px;"></div></div>
+          <div class="abonos-item"><div class="lbl">Asistida formalizado</div><div class="num" id="abonoAsistida">—</div><div class="lbl" id="abonoAsistidaSub" style="margin-top:6px;"></div></div>
+          <div class="abonos-item">
+            <div class="lbl">Cosecha mes anterior <span id="cosechaLabel"></span></div>
+            <div style="display:flex; gap:6px; margin-top:4px;">
+              <input type="number" id="cosechaAperturada" class="cosecha-input" placeholder="Aperturada">
+              <input type="number" id="cosechaSinAperturar" class="cosecha-input" placeholder="Sin aperturar">
+            </div>
+            <button class="btn small" id="btnGuardarCosecha" style="background:rgba(255,255,255,.18); color:#fff; margin-top:6px;">Guardar cosecha</button>
+          </div>
+          <div class="abonos-total"><div class="lbl">Total de abonos</div><div class="num" id="abonoTotal">—</div></div>
+        </div>
+      </div>
+
+      <footer>BBVA Perú · TC Respaldada</footer>
+    </div>
+
   </div>
 </div>
 
@@ -430,6 +525,8 @@ const MOTIVO_OBS_CATALOGO = [
 
 let TLM_RECORDS = [];
 let WEB_RECORDS = [];
+let RESP_RECORDS = [];
+let ASISTIDA_DNIS = new Set();
 let RECORDS = [];
 let charts = {};
 let currentView = 'global';
@@ -528,6 +625,31 @@ function parseRows(rows, canal){
   }).filter(r=> r.ejecutivo !== 'SIN ASIGNAR' || r.validador);
 }
 
+function parseRespaldadaRows(rows){
+  return rows.map(r=>{
+    const fv = parseFecha(r.F_VENTA);
+    const fg = parseFecha(r.FECHA_GESTION);
+    const resultado = (r.V_CANTADAS||'').toString().trim().toUpperCase();
+    return {
+      dni: (r.DNI||'').toString().trim(),
+      ejecutivo: (r.EJECUTIVO||'').toString().trim().toUpperCase() || 'SIN ASIGNAR',
+      validador: (r.VALIDADOR||'').toString().trim().toUpperCase(),
+      f_venta: fv ? isoDay(fv) : null,
+      mes: fv ? yearMonth(fv) : null,
+      fechaGestionDia: fg ? isoDay(fg) : null,
+      hora: parseHora(r.FECHA_GESTION),
+      resultado,
+      estadoWF: (r.DETALLE||'').toString().trim().toUpperCase(),
+      motivoRO: (r.ESTADO||'').toString().trim().toUpperCase(),
+      apertura: (r.Apertura||'').toString().trim()
+    };
+  }).filter(r=> r.resultado && r.resultado!=='PENDIENTE');
+}
+
+function parseAsistidasDnis(rows){
+  return [...new Set(rows.map(r=>(r.DNI||'').toString().trim()).filter(Boolean))];
+}
+
 function saveLocal(key, records, fileName){
   try{ localStorage.setItem(key, JSON.stringify({fileName, uploadedAt:new Date().toISOString(), records})); }catch(err){ console.error(err); }
 }
@@ -541,9 +663,30 @@ function loadLocal(key){
 
 document.getElementById('btnUploadTlm').addEventListener('click', ()=>document.getElementById('fileInputTlm').click());
 document.getElementById('btnUploadWeb').addEventListener('click', ()=>document.getElementById('fileInputWeb').click());
+document.getElementById('btnUploadResp').addEventListener('click', ()=>document.getElementById('fileInputResp').click());
+document.getElementById('btnUploadAsist').addEventListener('click', ()=>document.getElementById('fileInputAsist').click());
 document.getElementById('fileInputTlm').addEventListener('change', e=>handleFile(e,'TLM'));
 document.getElementById('fileInputWeb').addEventListener('change', e=>handleFile(e,'WEB'));
+document.getElementById('fileInputResp').addEventListener('change', handleFileResp);
+document.getElementById('fileInputAsist').addEventListener('change', handleFileAsist);
 document.getElementById('btnClear').addEventListener('click', clearData);
+document.getElementById('btnClearFiltersResp').addEventListener('click', ()=>{
+  ['fMesResp','fDiaResp','fValidadorResp'].forEach(id=>document.getElementById(id).value='');
+  render();
+});
+['fMesResp','fDiaResp','fValidadorResp'].forEach(id=>{
+  document.getElementById(id).addEventListener('change', ()=>{
+    if(id==='fMesResp') buildDiaOptionsResp();
+    render();
+  });
+});
+document.getElementById('btnGuardarCosecha').addEventListener('click', ()=>{
+  const aperturada = parseInt(document.getElementById('cosechaAperturada').value)||0;
+  const sinAperturar = parseInt(document.getElementById('cosechaSinAperturar').value)||0;
+  localStorage.setItem('bbva_cosecha', JSON.stringify({aperturada, sinAperturar}));
+  render();
+  publishData();
+});
 document.getElementById('btnClearFilters').addEventListener('click', ()=>{
   ['fCanal','fMes','fDia','fEjecutivo','fValidador'].forEach(id=>document.getElementById(id).value='');
   render();
@@ -562,6 +705,7 @@ document.querySelectorAll('.tab').forEach(t=>{
     document.getElementById('viewGlobal').classList.toggle('hidden', currentView!=='global');
     document.getElementById('viewMC').classList.toggle('hidden', currentView!=='mc');
     document.getElementById('viewAsesor').classList.toggle('hidden', currentView!=='asesor');
+    document.getElementById('viewRespaldada').classList.toggle('hidden', currentView!=='respaldada');
     render();
   });
 });
@@ -597,18 +741,74 @@ async function handleFile(e, canal){
 }
 
 function clearData(){
-  try{ localStorage.removeItem('bbva_tlm_raw'); localStorage.removeItem('bbva_web_raw'); }catch(err){}
-  TLM_RECORDS=[]; WEB_RECORDS=[]; RECORDS=[];
+  try{
+    localStorage.removeItem('bbva_tlm_raw'); localStorage.removeItem('bbva_web_raw');
+    localStorage.removeItem('bbva_resp_raw'); localStorage.removeItem('bbva_asist_raw'); localStorage.removeItem('bbva_cosecha');
+  }catch(err){}
+  TLM_RECORDS=[]; WEB_RECORDS=[]; RESP_RECORDS=[]; ASISTIDA_DNIS=new Set(); RECORDS=[];
   document.getElementById('emptyState').classList.remove('hidden');
   document.getElementById('dashboard').classList.add('hidden');
   document.getElementById('btnClear').classList.add('hidden');
   document.getElementById('statusTlm').textContent = 'TLM: sin datos';
   document.getElementById('statusWeb').textContent = 'WEB: sin datos';
+  document.getElementById('statusResp').textContent = 'Respaldada: sin datos';
+  document.getElementById('statusAsist').textContent = 'Asistidas: sin datos';
+}
+
+async function handleFileResp(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const statusEl = document.getElementById('statusResp');
+  statusEl.innerHTML = 'Procesando…';
+  try{
+    const buf = await file.arrayBuffer();
+    const wb = XLSX.read(buf, {type:'array', cellDates:true});
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, {defval:null, raw:false, dateNF:'dd/mm/yyyy'});
+    RESP_RECORDS = parseRespaldadaRows(rows);
+    saveLocal('bbva_resp_raw', RESP_RECORDS, file.name);
+    statusEl.innerHTML = 'Respaldada: <strong>'+file.name+'</strong> · '+RESP_RECORDS.length+' reg.';
+    document.getElementById('emptyState').classList.add('hidden');
+    document.getElementById('dashboard').classList.remove('hidden');
+    document.getElementById('btnClear').classList.remove('hidden');
+    buildFilterOptionsResp();
+    render();
+    publishData();
+  }catch(err){
+    statusEl.innerHTML = '<span style="color:#ffb4b4">Error al leer el archivo</span>';
+    console.error(err);
+  }
+  e.target.value='';
+}
+
+async function handleFileAsist(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const statusEl = document.getElementById('statusAsist');
+  statusEl.innerHTML = 'Procesando…';
+  try{
+    const buf = await file.arrayBuffer();
+    const wb = XLSX.read(buf, {type:'array', cellDates:true});
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, {defval:null, raw:false});
+    const dnis = parseAsistidasDnis(rows);
+    ASISTIDA_DNIS = new Set(dnis);
+    saveLocal('bbva_asist_raw', dnis, file.name);
+    statusEl.innerHTML = 'Asistidas: <strong>'+file.name+'</strong> · '+dnis.length+' DNI';
+    render();
+    publishData();
+  }catch(err){
+    statusEl.innerHTML = '<span style="color:#ffb4b4">Error al leer el archivo</span>';
+    console.error(err);
+  }
+  e.target.value='';
 }
 
 function loadStored(){
   const tlm = loadLocal('bbva_tlm_raw');
   const web = loadLocal('bbva_web_raw');
+  const resp = loadLocal('bbva_resp_raw');
+  const asist = loadLocal('bbva_asist_raw');
   if(tlm && tlm.records && tlm.records.length){
     TLM_RECORDS = tlm.records;
     document.getElementById('statusTlm').innerHTML = 'TLM: <strong>'+tlm.fileName+'</strong> · '+TLM_RECORDS.length+' reg.';
@@ -617,14 +817,48 @@ function loadStored(){
     WEB_RECORDS = web.records;
     document.getElementById('statusWeb').innerHTML = 'WEB: <strong>'+web.fileName+'</strong> · '+WEB_RECORDS.length+' reg.';
   }
+  if(resp && resp.records && resp.records.length){
+    RESP_RECORDS = resp.records;
+    document.getElementById('statusResp').innerHTML = 'Respaldada: <strong>'+resp.fileName+'</strong> · '+RESP_RECORDS.length+' reg.';
+  }
+  if(asist && asist.records && asist.records.length){
+    ASISTIDA_DNIS = new Set(asist.records);
+    document.getElementById('statusAsist').innerHTML = 'Asistidas: <strong>'+asist.fileName+'</strong> · '+asist.records.length+' DNI';
+  }
   RECORDS = TLM_RECORDS.concat(WEB_RECORDS);
-  if(RECORDS.length){
+  if(RECORDS.length || RESP_RECORDS.length){
     document.getElementById('emptyState').classList.add('hidden');
     document.getElementById('dashboard').classList.remove('hidden');
     document.getElementById('btnClear').classList.remove('hidden');
     buildFilterOptions();
+    buildFilterOptionsResp();
     render();
   }
+}
+
+function buildFilterOptionsResp(){
+  const meses=[...new Set(RESP_RECORDS.map(r=>r.mes).filter(Boolean))].sort();
+  const validadores=[...new Set(RESP_RECORDS.map(r=>r.validador).filter(Boolean))].sort();
+  fillSelect('fMesResp', meses, mesLabel);
+  fillSelect('fValidadorResp', validadores, formatNombre);
+  buildDiaOptionsResp();
+}
+function buildDiaOptionsResp(){
+  const mes = document.getElementById('fMesResp').value;
+  const dias = [...new Set(RESP_RECORDS.filter(r=>!mes || r.mes===mes).map(r=>r.f_venta).filter(Boolean))].sort();
+  fillSelect('fDiaResp', dias, diaLabel);
+}
+function getFilteredResp(){
+  const mes=document.getElementById('fMesResp').value;
+  const dia=document.getElementById('fDiaResp').value;
+  const va=document.getElementById('fValidadorResp').value;
+  return RESP_RECORDS.filter(r=> (!mes || r.mes===mes) && (!dia || r.f_venta===dia) && (!va || r.validador===va));
+}
+function getCosecha(){
+  try{
+    const raw = localStorage.getItem('bbva_cosecha');
+    return raw? JSON.parse(raw) : {aperturada:0, sinAperturar:0};
+  }catch(e){ return {aperturada:0, sinAperturar:0}; }
 }
 
 function buildFilterOptions(){
@@ -684,9 +918,11 @@ function render(){
     renderPendientes(data);
     renderDevValidador(data);
     renderTotalErroresValidador(data);
-  } else {
+  } else if(currentView==='asesor'){
     renderAsesorTable(data);
     renderAsesorObsRanking();
+  } else {
+    renderRespaldada();
   }
 }
 
@@ -1225,6 +1461,9 @@ async function publishData(){
     const payload = {
       tlm: loadLocal('bbva_tlm_raw'),
       web: loadLocal('bbva_web_raw'),
+      resp: loadLocal('bbva_resp_raw'),
+      asist: loadLocal('bbva_asist_raw'),
+      cosecha: getCosecha(),
       publishedAt: new Date().toISOString()
     };
     const content = b64EncodeUnicode(JSON.stringify(payload));
@@ -1247,6 +1486,112 @@ async function publishData(){
     statusEl.textContent = 'Error al publicar: '+err.message;
     console.error(err);
   }
+}
+
+/* ============ TC RESPALDADA ============ */
+
+function frowHtml(cls, name, n, total, chev){
+  return '<div class="frow '+cls+'"><div class="chev">'+(chev?'▾':'')+'</div><div class="name">'+name+'</div><div class="n">'+n.toLocaleString('es-PE')+'</div><div class="p">'+pct(n,total)+'%</div></div>';
+}
+function frowSubHtml(name, n, total, hl){
+  return '<div class="frow sub'+(hl?' highlight':'')+'"><div class="chev"></div><div class="name">'+name+'</div><div class="n">'+n.toLocaleString('es-PE')+'</div><div class="p">'+pct(n,total)+'%</div></div>';
+}
+
+function renderFunnelResp(elId, subset){
+  const total = subset.length;
+  const valida = subset.filter(r=>r.resultado==='VALIDA');
+  const presentado = valida.filter(r=>r.estadoWF==='WF PRESENTADO').length;
+  const formalizado = valida.filter(r=>r.estadoWF==='WF FORMALIZADO').length;
+  const observada = subset.filter(r=>r.resultado==='OBSERVADA').length;
+  const porDigitar = subset.filter(r=>r.resultado==='POR DIGITAR').length;
+  const rechazada = subset.filter(r=>r.resultado==='RECHAZADA');
+  const rechCounts = {};
+  rechazada.forEach(r=>{ const m = r.motivoRO || 'SIN MOTIVO'; rechCounts[m]=(rechCounts[m]||0)+1; });
+  const rechSubs = Object.entries(rechCounts).sort((a,b)=>b[1]-a[1]);
+
+  let html = frowHtml('lvl1', 'VALIDA', valida.length, total, true);
+  [{name:'WF Presentado', n:presentado, hl:false},{name:'WF Formalizado', n:formalizado, hl:true}]
+    .sort((a,b)=>b.n-a.n).forEach(s=>{ html += frowSubHtml(s.name, s.n, total, s.hl); });
+  if(observada>0) html += frowHtml('warn-row','OBSERVADA', observada, total, false);
+  if(porDigitar>0) html += frowHtml('', 'POR DIGITAR', porDigitar, total, false);
+  if(rechazada.length>0){
+    html += frowHtml('bad-row','RECHAZADA', rechazada.length, total, true);
+    rechSubs.forEach(([name,n])=>{ html += frowSubHtml(name, n, total, false); });
+  }
+  html += '<div class="frow total"><div class="chev"></div><div class="name">Total general</div><div class="n">'+total.toLocaleString('es-PE')+'</div><div class="p">100.00%</div></div>';
+  const el = document.getElementById(elId);
+  if(el) el.innerHTML = total>0 ? html : '<p style="color:var(--ink-mute); font-size:12.5px; text-align:center; padding:20px 0;">Sin datos</p>';
+}
+
+function renderCrossTabResp(tableId, subset){
+  const states = [
+    {label:'VALIDA', filter:r=>r.resultado==='VALIDA'},
+    {label:'WF Presentado', filter:r=>r.estadoWF==='WF PRESENTADO'},
+    {label:'WF Formalizado', filter:r=>r.estadoWF==='WF FORMALIZADO'},
+    {label:'OBSERVADA', filter:r=>r.resultado==='OBSERVADA'},
+    {label:'POR DIGITAR', filter:r=>r.resultado==='POR DIGITAR'},
+    {label:'RECHAZADA', filter:r=>r.resultado==='RECHAZADA'}
+  ];
+  const totalAp = subset.filter(r=>r.apertura==='Cuenta Aperturada').length;
+  const totalSin = subset.filter(r=>r.apertura==='Pendiente por Aperturar').length;
+  const totalGen = subset.length;
+  let rows = '';
+  states.forEach(s=>{
+    const rowsSub = subset.filter(s.filter);
+    if(rowsSub.length===0 && s.label!=='VALIDA' && s.label!=='WF Formalizado') return;
+    const ap = rowsSub.filter(r=>r.apertura==='Cuenta Aperturada').length;
+    const sin = rowsSub.filter(r=>r.apertura==='Pendiente por Aperturar').length;
+    const tot = rowsSub.length;
+    rows += '<tr><td>'+s.label+'</td><td>'+ap+'</td><td>'+pct(ap,totalAp)+'%</td><td>'+sin+'</td><td>'+pct(sin,totalSin)+'%</td><td>'+tot+'</td><td>'+pct(tot,totalGen)+'%</td></tr>';
+  });
+  rows += '<tr class="total-row"><td>Total general</td><td>'+totalAp+'</td><td>100%</td><td>'+totalSin+'</td><td>100%</td><td>'+totalGen+'</td><td>100%</td></tr>';
+  const tbody = document.querySelector('#'+tableId+' tbody');
+  if(tbody) tbody.innerHTML = rows;
+}
+
+function renderAbonos(formRegular, formAsistida){
+  const regAp = formRegular.filter(r=>r.apertura==='Cuenta Aperturada').length;
+  const regSin = formRegular.filter(r=>r.apertura==='Pendiente por Aperturar').length;
+  const asiAp = formAsistida.filter(r=>r.apertura==='Cuenta Aperturada').length;
+  const asiSin = formAsistida.filter(r=>r.apertura==='Pendiente por Aperturar').length;
+  document.getElementById('abonoRegular').textContent = formRegular.length.toLocaleString('es-PE');
+  document.getElementById('abonoRegularSub').textContent = regAp+' aperturada + '+regSin+' sin aperturar';
+  document.getElementById('abonoAsistida').textContent = formAsistida.length.toLocaleString('es-PE');
+  document.getElementById('abonoAsistidaSub').textContent = asiAp+' aperturada + '+asiSin+' sin aperturar';
+
+  const cosecha = getCosecha();
+  document.getElementById('cosechaAperturada').value = cosecha.aperturada || '';
+  document.getElementById('cosechaSinAperturar').value = cosecha.sinAperturar || '';
+
+  const cosechaTotal = (cosecha.aperturada||0) + (cosecha.sinAperturar||0);
+  const totalAbonos = formRegular.length + formAsistida.length + cosechaTotal;
+  document.getElementById('abonoTotal').textContent = totalAbonos.toLocaleString('es-PE');
+}
+
+function renderRespaldada(){
+  const data = getFilteredResp();
+  const regular = data.filter(r=> !ASISTIDA_DNIS.has(r.dni));
+  const asistida = data.filter(r=> ASISTIDA_DNIS.has(r.dni));
+
+  const totalGestionado = data.length;
+  const formTotal = data.filter(r=>r.estadoWF==='WF FORMALIZADO').length;
+  const formRegular = regular.filter(r=>r.estadoWF==='WF FORMALIZADO');
+  const formAsistida = asistida.filter(r=>r.estadoWF==='WF FORMALIZADO');
+  const formAperturada = data.filter(r=>r.estadoWF==='WF FORMALIZADO' && r.apertura==='Cuenta Aperturada').length;
+  const validaTotal = data.filter(r=>r.resultado==='VALIDA').length;
+
+  document.getElementById('respKpiRow').innerHTML = [
+    {label:'Total gestionado', val:totalGestionado.toLocaleString('es-PE'), sub:regular.length+' regular + '+asistida.length+' asistida', cls:''},
+    {label:'Formalizado total', val:formTotal.toLocaleString('es-PE'), sub:formRegular.length+' regular + '+formAsistida.length+' asistida', cls:'accent'},
+    {label:'% Aperturada (formalizado)', val: pct(formAperturada,formTotal)+'%', sub:formAperturada+' de '+formTotal, cls:'aqua'},
+    {label:'% Válida', val: pct(validaTotal,totalGestionado)+'%', sub:validaTotal+' de '+totalGestionado, cls:''}
+  ].map(i=>'<div class="kpi '+i.cls+'"><div class="label">'+i.label+'</div><div class="val">'+i.val+'</div><div class="sub">'+i.sub+'</div></div>').join('');
+
+  renderFunnelResp('funnelRespRegular', regular);
+  renderFunnelResp('funnelRespAsistida', asistida);
+  renderCrossTabResp('tblCrossRegular', regular);
+  renderCrossTabResp('tblCrossAsistida', asistida);
+  renderAbonos(formRegular, formAsistida);
 }
 
 loadStored();
