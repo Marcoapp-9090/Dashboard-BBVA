@@ -221,7 +221,7 @@
 
       <div class="grid2">
         <div class="panel">
-          <div class="panel-head"><h3>Apertura de WF Devueltas — motivo del banco</h3><span class="pill-count" id="devueltasCount"></span><button class="btn small" id="btnDescargarDevBanco" style="background:var(--blue); color:#fff;">⬇ Descargar</button></div>
+          <div class="panel-head"><h3>Apertura de WF Devueltas</h3><span class="pill-count" id="devueltasCount"></span><button class="btn small" id="btnDescargarDevBanco" style="background:var(--blue); color:#fff;">⬇ Descargar</button></div>
           <div class="chartbox" style="height:280px;"><canvas id="chartMotivos"></canvas></div>
         </div>
         <div class="panel">
@@ -240,33 +240,6 @@
       <div class="kpis" id="mcKpiRow"></div>
 
       <div class="panel" style="margin-bottom:14px;">
-        <div class="panel-head"><h3>Avance por validador</h3></div>
-        <div class="table-scroll">
-          <table id="tblAvanceValidador">
-            <thead><tr><th>Validador</th><th>Gestionado</th><th>Válidas</th><th>Observadas</th><th>Rechazadas</th><th>Devueltas</th></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="kpis" id="efKpiRow" style="grid-template-columns:repeat(3,1fr);"></div>
-      <div class="panel" style="margin-bottom:14px;">
-        <div class="panel-head"><h3>Errores del equipo por categoría</h3></div>
-        <p class="desc" style="font-size:11px; color:var(--ink-mute); margin:-8px 0 12px;">Acumulado de todos los validadores — cuenta cada devolución del historial, no solo la última</p>
-        <div class="chartbox" style="height:200px;"><canvas id="chartErrCategoria"></canvas></div>
-      </div>
-      <div class="panel" style="margin-bottom:14px;">
-        <div class="panel-head"><h3>Efectividad y errores imputables por validador</h3></div>
-        <p class="desc" style="font-size:11px; color:var(--ink-mute); margin:-8px 0 12px;">Clic en un validador para ver en qué categoría se concentran sus errores</p>
-        <div class="table-scroll">
-          <table id="tblEfectividad">
-            <thead><tr><th style="text-align:left;">Validador</th><th>Gestionado</th><th>Total errores</th><th style="text-align:right;">Efectividad</th></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="panel" style="margin-bottom:14px;">
         <div class="panel-head"><h3>Ventas validadas por hora, por validador</h3></div>
         <div class="daybar" id="heatmapDayBar"></div>
         <div class="table-scroll" style="max-height:420px;">
@@ -274,32 +247,50 @@
         </div>
       </div>
 
-      <div class="grid2">
-        <div class="panel">
-          <div class="panel-head"><h3>Ventas pendientes de validación</h3><span class="pill-count" id="pendCount"></span></div>
-          <div class="table-scroll">
-            <table id="tblPendientes">
-              <thead><tr><th>Fecha de venta</th><th>Canal</th><th style="text-align:left;">Validador asignado</th></tr></thead>
-              <tbody></tbody>
-            </table>
-          </div>
+      <div class="panel" style="margin-bottom:14px;">
+        <div class="panel-head"><h3>Avance por validador</h3></div>
+        <div class="table-scroll">
+          <table id="tblAvanceValidador">
+            <thead><tr><th style="text-align:left;">Validador</th><th>Gestionado TLM</th><th>Gestionado WEB</th><th>Total</th><th>Válidas</th><th style="text-align:right;">% Válida</th></tr></thead>
+            <tbody></tbody>
+          </table>
         </div>
-        <div class="panel">
-          <div class="panel-head"><h3>Devueltas MC</h3><button class="btn small" id="btnDescargarDevMC" style="background:var(--blue); color:#fff;">⬇ Descargar</button></div>
-          <div class="table-scroll">
-            <table id="tblDevValidador">
-              <thead><tr><th style="text-align:left;">Fecha de devolución</th><th style="text-align:left;">Validador</th><th style="text-align:left;">Motivo</th></tr></thead>
-              <tbody></tbody>
-            </table>
+      </div>
+
+      <div class="kpis" id="efKpiRow" style="grid-template-columns:repeat(3,1fr);"></div>
+
+      <div class="panel" style="margin-bottom:14px;">
+        <div class="panel-head"><h3>Errores del equipo por motivo</h3><button class="btn small" id="btnDescargarTodasDev" style="background:var(--blue); color:#fff;">⬇ Descargar</button></div>
+        <p class="desc" style="font-size:11px; color:var(--ink-mute); margin:-8px 0 12px;">Acumulado del mes</p>
+        <div class="grid2" style="margin-bottom:0;">
+          <div>
+            <div style="font-size:11px; color:var(--ink-mute); text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin-bottom:6px; text-align:center;">Total de devueltas por responsable</div>
+            <div class="chartbox" style="height:280px;"><canvas id="chartMacroResponsable"></canvas></div>
+          </div>
+          <div>
+            <div style="font-size:11px; color:var(--ink-mute); text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin-bottom:6px;">Detalle · solo motivos imputables al validador</div>
+            <div class="chartbox" style="height:280px;"><canvas id="chartErrCategoria"></canvas></div>
           </div>
         </div>
       </div>
 
       <div class="panel" style="margin-bottom:14px;">
-        <div class="panel-head"><h3>Total errores por validador</h3></div>
+        <div class="panel-head"><h3>Efectividad y errores imputables por validador</h3></div>
+        <p class="desc" style="font-size:11px; color:var(--ink-mute); margin:-8px 0 12px;">Clic en un validador para ver en qué motivo se concentran sus errores</p>
+        <div class="table-scroll">
+          <table id="tblEfectividad">
+            <thead><tr><th style="text-align:left;">Validador</th><th>OUT</th><th>WEB</th><th>Total</th><th>Errores</th><th style="text-align:right;">Efectividad</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-bottom:14px;">
+        <div class="panel-head"><h3>Total errores por validador — motivos imputables</h3></div>
+        <p class="desc" style="font-size:11px; color:var(--ink-mute); margin:-8px 0 12px;">Solo se muestran categorías con submotivos responsabilidad del validador</p>
         <div class="table-scroll">
           <table id="tblTotalErroresValidador">
-            <thead><tr><th style="text-align:left;">Validador</th><th>Datos difiere o en blanco</th><th>Llenado ficha</th><th>Canal de venta</th><th>Total</th></tr></thead>
+            <thead><tr><th style="text-align:left;">Validador</th><th>Sin documentos sustentarios</th><th>Perfil no gestionable</th><th>Datos adicionales difiere/en blanco</th><th>Documentos no coincide con WF</th><th>Total</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -410,6 +401,38 @@ const COLORS = {VALIDA:AQUA, RECHAZADA:RED, OBSERVADA:AMBER, PENDIENTE:GRAY};
 const MOTIVO_COLORS = [BLUE,AQUA,AMBER,RED,GRAY,'#1464A5','#B5760A','#6b7a94','#7d5ba6','#c76a9a'];
 const MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 
+// Catalogo oficial de codigos WF (Excel "errores_y_codigos") - codigo -> {motivo, categoria, responsable}
+const CODIGO_CATALOGO = {
+  'A1': {motivo:'Sin oferta MOI', categoria:'Sin oferta MOI', responsable:'EVERIS'},
+  'B1': {motivo:'Por tipo de TC', categoria:'MOI difiere en oferta', responsable:'EVERIS'},
+  'B2': {motivo:'Por línea de crédito', categoria:'MOI difiere en oferta', responsable:'EVERIS'},
+  'C1': {motivo:'Estado civil', categoria:'Datos básicos difiere WF vs RENIEC', responsable:'EVERIS'},
+  'C2': {motivo:'Nombres mal ingresados', categoria:'Datos básicos difiere WF vs RENIEC', responsable:'EVERIS'},
+  'D1': {motivo:'Oferta en vuelo', categoria:'Oferta en vuelo', responsable:'EVERIS'},
+  'E1': {motivo:'Tarjeta ofertada igual que contrato vigente', categoria:'Mismo producto activo', responsable:'EVERIS'},
+  'F1': {motivo:'Cónyuge mal calificado', categoria:'Cónyuge mal calificado', responsable:'EVERIS'},
+  'G1': {motivo:'No se adjuntó boleta de pago', categoria:'Sin documentos sustentarios', responsable:'VALIDADOR'},
+  'G2': {motivo:'No se adjuntó RRSS', categoria:'Sin documentos sustentarios', responsable:'VALIDADOR'},
+  'H1': {motivo:'Edad mínima no permitida', categoria:'Perfil no gestionable', responsable:'VALIDADOR'},
+  'H2': {motivo:'Cargo actual no gestionable', categoria:'Perfil no gestionable', responsable:'VALIDADOR'},
+  'H3': {motivo:'Independiente misma dirección', categoria:'Perfil no gestionable', responsable:'VALIDADOR'},
+  'H4': {motivo:'Dependiente misma dirección', categoria:'Perfil no gestionable', responsable:'VALIDADOR'},
+  'H5': {motivo:'Titular mal calificado', categoria:'Perfil no gestionable', responsable:'EVERIS'},
+  'H6': {motivo:'Cliente inelegible', categoria:'Perfil no gestionable', responsable:'EVERIS'},
+  'H7': {motivo:'Ingresos inferiores', categoria:'Perfil no gestionable', responsable:'VALIDADOR'},
+  'I1': {motivo:'Error de llenado en WF', categoria:'Datos adicionales difiere/en blanco', responsable:'VALIDADOR'},
+  'I2': {motivo:'Campos sin llenar en WF', categoria:'Datos adicionales difiere/en blanco', responsable:'VALIDADOR'},
+  'J1': {motivo:'Direcciones de WF difiere a VD/VL', categoria:'Documentos no coincide con WF', responsable:'VALIDADOR'},
+  'J2': {motivo:'Direcciones de WF difiere a RRSS', categoria:'Documentos no coincide con WF', responsable:'VALIDADOR'},
+  'K1': {motivo:'VD/VL inválida', categoria:'Equifax inválido', responsable:'EVERIS'},
+  'K2': {motivo:'Zona peligrosa', categoria:'Equifax inválido', responsable:'EVERIS'},
+  'K3': {motivo:'Empresa no se encuentra en el listado', categoria:'Equifax inválido', responsable:'EVERIS'},
+  'K4': {motivo:'Reporte de SBS inválido', categoria:'Equifax inválido', responsable:'EVERIS'},
+};
+// Categorias reales con al menos un submotivo imputable al validador (para la tabla de 4 columnas)
+const CATEGORIAS_VALIDADOR = ['Sin documentos sustentarios','Perfil no gestionable','Datos adicionales difiere/en blanco','Documentos no coincide con WF'];
+
+// Respaldo por palabras clave, solo quando NO se encuentra codigo al inicio del texto
 const MOTIVO_CATALOGO = [
   ['SIN OFETA','Sin oferta MOI'],
   ['SIN OFERTA','Sin oferta MOI'],
@@ -417,8 +440,8 @@ const MOTIVO_CATALOGO = [
   ['LINEA DE CREDITO','Por línea de crédito'],
   ['INGRESOS INFERIORES','Ingresos inferiores'],
   ['CANAL VENTA','Canal de venta'],
-  ['SIN LLENAR','Error de llenado WF'],
-  ['LLENADO','Error de llenado WF'],
+  ['SIN LLENAR','Error de llenado en WF'],
+  ['LLENADO','Error de llenado en WF'],
   ['ESTADO CIVIL','Estado civil'],
   ['CORREO ELECTRONICO','Correo electrónico inválido'],
   ['TIPO DE TC','Por tipo de TC'],
@@ -430,18 +453,16 @@ const MOTIVO_CATALOGO = [
   ['DUPLICAD','Venta duplicada'],
   ['RENIEC','Datos no coinciden con RENIEC'],
 ];
-// Motivos NO imputables al validador (responsabilidad del banco / cliente / oferta) - segun clasificacion "Errores Everis"
-const MOTIVOS_NO_IMPUTABLES = ['Sin oferta MOI','Oferta en vuelo','Estado civil','Por línea de crédito','Por tipo de TC','Datos no coinciden con RENIEC','Sin motivo registrado','Venta duplicada','Límite mínimo de contrato'];
-// Categorias imputables al validador, para el panel de efectividad
-const CATEGORIA_ERROR = {
-  'Error de llenado WF': 'Datos difiere / en blanco',
-  'Dependiente misma dirección': 'Llenado ficha',
-  'Modalidad laboral no coincide': 'Llenado ficha',
-  'Ingresos inferiores': 'Llenado ficha',
-  'Canal de venta': 'Canal de venta',
-  'Correo electrónico inválido': 'Datos difiere / en blanco',
-  'Datos incompletos': 'Datos difiere / en blanco',
+// Responsable para los motivos de respaldo (cuando no hay codigo)
+const MOTIVO_RESPONSABLE_FALLBACK = {
+  'Sin oferta MOI':'EVERIS', 'Oferta en vuelo':'EVERIS', 'Por línea de crédito':'EVERIS',
+  'Estado civil':'EVERIS', 'Por tipo de TC':'EVERIS', 'Límite mínimo de contrato':'EVERIS',
+  'Venta duplicada':'EVERIS', 'Datos no coinciden con RENIEC':'EVERIS',
+  'Ingresos inferiores':'VALIDADOR', 'Canal de venta':'VALIDADOR', 'Error de llenado en WF':'VALIDADOR',
+  'Correo electrónico inválido':'VALIDADOR', 'Datos incompletos':'VALIDADOR', 'Dependiente misma dirección':'VALIDADOR',
+  'Modalidad laboral no coincide':'VALIDADOR',
 };
+
 
 const MOTIVO_OBS_CATALOGO = [
   ['NO MENCIONA','EEVV no menciona información obligatoria'],
@@ -558,8 +579,28 @@ function homologar(texto, catalogo, fallback){
   return fallback;
 }
 
+// Busca un codigo (letra+digito) al inicio del texto, ej "A1 SIN OFERTA MOI" -> "A1"
+function extraerCodigo(texto){
+  if(!texto) return null;
+  const m = String(texto).trim().match(/^([A-Za-z])\s*[-–.]?\s*(\d{1,2})\b/);
+  if(!m) return null;
+  return (m[1]+m[2]).toUpperCase();
+}
+
+// Resuelve motivo/categoria/responsable de un texto: primero por codigo, si no por palabras clave
+function resolverMotivo(texto){
+  const codigo = extraerCodigo(texto);
+  if(codigo && CODIGO_CATALOGO[codigo]){
+    const c = CODIGO_CATALOGO[codigo];
+    return {motivo:c.motivo, categoria:c.categoria, responsable:c.responsable, codigo};
+  }
+  const motivo = homologar(texto, MOTIVO_CATALOGO, 'Sin motivo registrado');
+  const responsable = MOTIVO_RESPONSABLE_FALLBACK[motivo] || 'EVERIS';
+  return {motivo, categoria:null, responsable, codigo:null};
+}
+
 function extraerMotivoYIntentos(texto){
-  if(!texto) return {motivo:null, intentos:0, fecha:null, historial:[]};
+  if(!texto) return {motivo:null, intentos:0, fecha:null, historial:[], responsable:null, categoria:null};
   const t = String(texto);
   const re = /(\d{1,2}\/\d{1,2}\/\d{4})\s+\d{2}:\d{2}:\d{2}\s+MOTIVO RECHAZO\s*\/\s*MOTIVO DEVOLUCION\s*:\s*([^\n]{1,200}?)(?=\s*\d{1,2}\/\d{1,2}\/\d{2,4}|\s*$)/g;
   let match, best=null, count=0;
@@ -568,13 +609,13 @@ function extraerMotivoYIntentos(texto){
     count++;
     const fecha = parseFecha(match[1]);
     const texto2 = match[2].trim();
-    const motivoEv = homologar(texto2, MOTIVO_CATALOGO, 'Sin motivo registrado');
-    historial.push({fecha: fecha?isoDay(fecha):null, motivo: motivoEv});
+    const resuelto = resolverMotivo(texto2);
+    historial.push({fecha: fecha?isoDay(fecha):null, motivo: resuelto.motivo, categoria: resuelto.categoria, responsable: resuelto.responsable});
     if(!best || (fecha && best.fecha && fecha > best.fecha) || (fecha && !best.fecha)) best = {fecha, texto:texto2};
   }
-  if(!best) return {motivo:null, intentos:count, fecha:null, historial};
-  const motivoCorto = homologar(best.texto, MOTIVO_CATALOGO, 'Sin motivo registrado');
-  return {motivo:motivoCorto, intentos:count, fecha: best.fecha ? isoDay(best.fecha) : null, historial};
+  if(!best) return {motivo:null, intentos:count, fecha:null, historial, responsable:null, categoria:null};
+  const resueltoBest = resolverMotivo(best.texto);
+  return {motivo:resueltoBest.motivo, categoria:resueltoBest.categoria, responsable:resueltoBest.responsable, intentos:count, fecha: best.fecha ? isoDay(best.fecha) : null, historial};
 }
 
 function parseRows(rows, canal){
@@ -602,6 +643,8 @@ function parseRows(rows, canal){
       motivoRO,
       motivoObs,
       motivoDevuelta: wfInfo.motivo,
+      categoriaDevuelta: wfInfo.categoria,
+      responsableDevuelta: wfInfo.responsable,
       fechaDevolucion: wfInfo.fecha,
       intentos: wfInfo.intentos,
       historialErrores: wfInfo.historial
@@ -678,7 +721,7 @@ document.querySelectorAll('.tab').forEach(t=>{
     render();
   });
 });
-document.getElementById('btnDescargarDevMC').addEventListener('click', descargarDevueltasMC);
+document.getElementById('btnDescargarTodasDev').addEventListener('click', descargarTodasDevueltas);
 document.getElementById('btnDescargarDevBanco').addEventListener('click', descargarDevueltasBanco);
 
 async function handleFile(e, canal){ /* no aplica en la vista pública */ }
@@ -805,11 +848,9 @@ function render(){
     renderRecuperacion(data);
   } else if(currentView==='mc'){
     renderMcKPIs(data);
+    renderHeatmap(data);
     renderAvanceValidador(data);
     renderEfectividad(data);
-    renderHeatmap(data);
-    renderPendientes(data);
-    renderDevValidador(data);
     renderTotalErroresValidador(data);
   } else if(currentView==='asesor'){
     renderAsesorTable(data);
@@ -1033,88 +1074,118 @@ function renderAvanceValidador(data){
   const byVal = {};
   data.forEach(r=>{
     const key = r.validador || '';
-    byVal[key] = byVal[key] || {total:0, validas:0, observadas:0, rechazadas:0, devueltas:0};
+    byVal[key] = byVal[key] || {tlm:0, web:0, total:0, validas:0};
     byVal[key].total++;
+    if(r.canal==='TLM') byVal[key].tlm++; else if(r.canal==='WEB') byVal[key].web++;
     if(r.resultado==='VALIDA') byVal[key].validas++;
-    if(r.resultado==='OBSERVADA') byVal[key].observadas++;
-    if(r.resultado==='RECHAZADA') byVal[key].rechazadas++;
-    if(r.estadoWF==='WF DEVUELTO') byVal[key].devueltas++;
   });
   const rows = Object.entries(byVal).filter(([k])=>k).sort((a,b)=>b[1].total-a[1].total);
   const tbody = document.querySelector('#tblAvanceValidador tbody');
-  const cell = (n,total,goodIfHigh)=>{
-    const p = pct(n,total);
-    return n.toLocaleString('es-PE')+'<span class="cellsub" style="color:'+(goodIfHigh? (p>=90?'#0f8a6f':p>=75?'#B5760A':'#B23A48') : (p<=5?'#0f8a6f':p<=15?'#B5760A':'#B23A48'))+'">'+p+'%</span>';
-  };
   tbody.innerHTML = rows.map(([name,v])=>{
-    return '<tr><td>'+formatNombre(name)+'</td><td>'+v.total.toLocaleString('es-PE')+'</td>'+
-      '<td>'+cell(v.validas,v.total,true)+'</td>'+
-      '<td>'+cell(v.observadas,v.total,false)+'</td>'+
-      '<td>'+cell(v.rechazadas,v.total,false)+'</td>'+
-      '<td>'+cell(v.devueltas,v.total,false)+'</td></tr>';
+    const p = pct(v.validas, v.total);
+    const cls = p>=96?'ok':(p>=90?'warn':'bad');
+    return '<tr><td>'+formatNombre(name)+'</td><td>'+v.tlm.toLocaleString('es-PE')+'</td><td>'+v.web.toLocaleString('es-PE')+'</td>'+
+      '<td>'+v.total.toLocaleString('es-PE')+'</td><td>'+v.validas.toLocaleString('es-PE')+'</td>'+
+      '<td style="text-align:right;"><span class="pill '+cls+'">'+p+'%</span></td></tr>';
   }).join('') || '<tr><td colspan="6" style="text-align:center; color:var(--ink-mute);">Sin datos</td></tr>';
 }
 
 let efectividadState = {};
 function renderEfectividad(data){
   const byVal = {};
-  const catTotals = {};
+  const motivoTotals = {};
+  let totalEveris = 0, totalValidador = 0;
   data.forEach(r=>{
     const key = r.validador || '';
     if(!key) return;
-    byVal[key] = byVal[key] || {gestionado:0, errores:0, cats:{}};
-    byVal[key].gestionado++;
+    byVal[key] = byVal[key] || {tlm:0, web:0, total:0, errores:0, motivos:{}};
+    byVal[key].total++;
+    if(r.canal==='TLM') byVal[key].tlm++; else if(r.canal==='WEB') byVal[key].web++;
     (r.historialErrores||[]).forEach(ev=>{
-      const cat = CATEGORIA_ERROR[ev.motivo];
-      if(!cat) return;
+      if(ev.responsable==='EVERIS') totalEveris++;
+      else if(ev.responsable==='VALIDADOR') totalValidador++;
+      if(ev.responsable!=='VALIDADOR') return;
       byVal[key].errores++;
-      byVal[key].cats[cat] = (byVal[key].cats[cat]||0)+1;
-      catTotals[cat] = (catTotals[cat]||0)+1;
+      if(!ev.categoria) return; // solo motivos verificados por codigo entran al detalle de 11 submotivos
+      byVal[key].motivos[ev.motivo] = (byVal[key].motivos[ev.motivo]||0)+1;
+      motivoTotals[ev.motivo] = (motivoTotals[ev.motivo]||0)+1;
     });
   });
 
-  const totalErrores = Object.values(catTotals).reduce((a,b)=>a+b,0);
-  const totalGestionado = Object.values(byVal).reduce((a,b)=>a+b.gestionado,0);
+  const totalErrores = totalValidador;
+  const totalGestionado = Object.values(byVal).reduce((a,b)=>a+b.total,0);
   const efectividadEquipo = totalGestionado? Math.round((1-totalErrores/totalGestionado)*10000)/100 : 100;
-  const catEntries = Object.entries(catTotals).sort((a,b)=>b[1]-a[1]);
-  const catTop = catEntries[0];
+  const motivoEntries = Object.entries(motivoTotals).sort((a,b)=>b[1]-a[1]);
+  const motivoTop = motivoEntries[0];
   document.getElementById('efKpiRow').innerHTML = [
     {label:'Errores imputables', val:totalErrores.toLocaleString('es-PE'), sub:'de '+totalGestionado.toLocaleString('es-PE')+' ventas gestionadas', cls:'', size:'21px'},
     {label:'Efectividad del equipo', val:efectividadEquipo+'%', sub:'promedio del periodo filtrado', cls:'aqua', size:'21px'},
-    {label:'Categoría más frecuente', val: catTop?catTop[0]:'—', sub: catTop? (catTop[1]+' de '+totalErrores+' errores') : 'sin errores', cls:'warn', size:'15px'}
+    {label:'Motivo más frecuente', val: motivoTop?motivoTop[0]:'—', sub: motivoTop? (motivoTop[1]+' de '+totalErrores+' errores') : 'sin errores', cls:'warn', size:'14px'}
   ].map(i=>'<div class="kpi '+i.cls+'"><div class="label">'+i.label+'</div><div class="val" style="font-size:'+i.size+';">'+i.val+'</div><div class="sub">'+i.sub+'</div></div>').join('');
 
+  // Dona macro Everis vs Validador
+  destroyChart('macroResponsable');
+  const macroTotal = totalEveris + totalValidador;
+  charts.macroResponsable = new Chart(document.getElementById('chartMacroResponsable'), {
+    type:'doughnut',
+    data:{
+      labels:['Validador','Everis'],
+      datasets:[{data:[totalValidador, totalEveris], backgroundColor:['#E3A891','#7FA6C9'], borderColor:'#fff', borderWidth:3}]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false, cutout:'62%',
+      plugins:{
+        legend:{position:'bottom', labels:{boxWidth:10, font:{size:11}, color:NAVY}}
+      }
+    },
+    plugins:[{
+      id:'centerTextPlugin',
+      afterDraw(chart){
+        const {ctx, chartArea:{width,height,top,left}} = chart;
+        ctx.save();
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.font='800 22px -apple-system, sans-serif'; ctx.fillStyle=NAVY;
+        ctx.fillText(macroTotal, left+width/2, top+height/2-8);
+        ctx.font='600 10px -apple-system, sans-serif'; ctx.fillStyle='#4a5a72';
+        ctx.fillText('devueltas', left+width/2, top+height/2+12);
+        ctx.restore();
+      }
+    }]
+  });
+
+  // Detalle 11 submotivos imputables
   destroyChart('errCategoria');
   charts.errCategoria = new Chart(document.getElementById('chartErrCategoria'), {
     type:'bar',
-    data:{labels:catEntries.map(e=>e[0]), datasets:[{data:catEntries.map(e=>e[1]), backgroundColor:BLUE, labelColor:'#04213d', borderRadius:4, maxBarThickness:22}]},
+    data:{labels:motivoEntries.map(e=>e[0]), datasets:[{data:motivoEntries.map(e=>e[1]), backgroundColor:BLUE, labelColor:'#04213d', borderRadius:4, maxBarThickness:18}]},
     options:{
       indexAxis:'y', responsive:true, maintainAspectRatio:false,
       plugins:{legend:{display:false}},
-      scales:{x:{beginAtZero:true, ticks:{precision:0}}, y:{ticks:{font:{size:11}}}}
+      scales:{x:{beginAtZero:true, ticks:{precision:0}}, y:{ticks:{font:{size:10}}}}
     }
   });
 
-  const rows = Object.entries(byVal).sort((a,b)=>b[1].errores-a[1].errores || b[1].gestionado-a[1].gestionado);
+  const rows = Object.entries(byVal).sort((a,b)=>b[1].errores-a[1].errores || b[1].total-a[1].total);
   const tbody = document.querySelector('#tblEfectividad tbody');
   let html = '';
   rows.forEach(([name,v])=>{
-    const eff = v.gestionado? Math.round((1-v.errores/v.gestionado)*10000)/100 : 100;
-    const color = eff>=99?AQUA:(eff>=97?AMBER:RED);
+    const eff = v.total? Math.round((1-v.errores/v.total)*10000)/100 : 100;
+    const cls = eff>=99?'ok':(eff>=97?'warn':'bad');
     const hasErrors = v.errores>0;
     const chev = hasErrors ? (efectividadState[name]?'▾':'▸') : '';
     html += '<tr class="main-row'+(hasErrors?' has-toggle':'')+'" data-val="'+name.replace(/"/g,'&quot;')+'">'+
       '<td><span class="tchev">'+chev+'</span>'+formatNombre(name)+'</td>'+
-      '<td>'+v.gestionado.toLocaleString('es-PE')+'</td>'+
+      '<td>'+v.tlm.toLocaleString('es-PE')+'</td><td>'+v.web.toLocaleString('es-PE')+'</td>'+
+      '<td>'+v.total.toLocaleString('es-PE')+'</td>'+
       '<td class="'+(hasErrors?'errnum':'zero')+'">'+v.errores+'</td>'+
-      '<td><div class="eff-cell"><div class="eff-track"><div class="eff-fill" style="width:'+eff+'%; background:'+color+';"></div></div><span class="eff-val">'+eff+'%</span></div></td></tr>';
+      '<td style="text-align:right;"><span class="pill '+cls+'">'+eff+'%</span></td></tr>';
     if(hasErrors && efectividadState[name]){
-      Object.entries(v.cats).sort((a,b)=>b[1]-a[1]).forEach(([cat,n])=>{
-        html += '<tr class="sub-row"><td>'+cat+'</td><td></td><td>'+n+'</td><td></td></tr>';
+      Object.entries(v.motivos).sort((a,b)=>b[1]-a[1]).forEach(([motivo,n])=>{
+        html += '<tr class="sub-row"><td>'+motivo+'</td><td></td><td></td><td></td><td>'+n+'</td><td></td></tr>';
       });
     }
   });
-  tbody.innerHTML = html || '<tr><td colspan="4" style="text-align:center; color:var(--ink-mute);">Sin datos</td></tr>';
+  tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center; color:var(--ink-mute);">Sin datos</td></tr>';
   tbody.querySelectorAll('tr.main-row.has-toggle').forEach(row=>{
     row.addEventListener('click', ()=>{
       const key = row.getAttribute('data-val');
@@ -1122,6 +1193,41 @@ function renderEfectividad(data){
       renderEfectividad(getFiltered());
     });
   });
+}
+
+function renderTotalErroresValidador(data){
+  const byVal = {};
+  data.forEach(r=>{
+    const key = r.validador || '';
+    if(!key) return;
+    byVal[key] = byVal[key] || {'Sin documentos sustentarios':0,'Perfil no gestionable':0,'Datos adicionales difiere/en blanco':0,'Documentos no coincide con WF':0, total:0};
+    (r.historialErrores||[]).forEach(ev=>{
+      if(ev.responsable!=='VALIDADOR' || !ev.categoria) return;
+      if(!CATEGORIAS_VALIDADOR.includes(ev.categoria)) return;
+      byVal[key][ev.categoria] = (byVal[key][ev.categoria]||0)+1;
+      byVal[key].total++;
+    });
+  });
+  const rows = Object.entries(byVal).sort((a,b)=>b[1].total-a[1].total);
+  const tbody = document.querySelector('#tblTotalErroresValidador tbody');
+  const totals = {'Sin documentos sustentarios':0,'Perfil no gestionable':0,'Datos adicionales difiere/en blanco':0,'Documentos no coincide con WF':0, total:0};
+  rows.forEach(([,v])=>{ CATEGORIAS_VALIDADOR.forEach(c=>totals[c]+=v[c]); totals.total+=v.total; });
+  const pillFor = n => {
+    const cls = n===0 ? 'ok' : (n<=2 ? 'warn' : 'bad');
+    return '<span class="pill '+cls+'">'+n+'</span>';
+  };
+  tbody.innerHTML = (rows.length ? rows.map(([name,v])=>
+    '<tr><td>'+formatNombre(name)+'</td><td>'+v['Sin documentos sustentarios']+'</td><td>'+v['Perfil no gestionable']+'</td><td>'+v['Datos adicionales difiere/en blanco']+'</td><td>'+v['Documentos no coincide con WF']+'</td><td>'+pillFor(v.total)+'</td></tr>'
+  ).join('') : '<tr><td colspan="6" style="text-align:center; color:var(--ink-mute);">Sin datos</td></tr>')
+  + '<tr class="total-row"><td>Total general</td><td>'+totals['Sin documentos sustentarios']+'</td><td>'+totals['Perfil no gestionable']+'</td><td>'+totals['Datos adicionales difiere/en blanco']+'</td><td>'+totals['Documentos no coincide con WF']+'</td><td>'+totals.total+'</td></tr>';
+}
+
+function descargarTodasDevueltas(){
+  const data = getFiltered().filter(r=>r.estadoWF==='WF DEVUELTO');
+  const rows = data.map(r=>[
+    r.dni, formatNombre(r.ejecutivo), r.validador?formatNombre(r.validador):'', r.motivoDevuelta||'Sin motivo registrado', r.canal, r.fechaDevolucion?diaLabel(r.fechaDevolucion):'', r.responsableDevuelta||'Sin definir'
+  ]);
+  descargarCSV(rows, ['DNI','Ejecutivo','Validador','Motivo','Canal','Fecha de devolución','Responsable'], 'devueltas_completo_'+new Date().toISOString().slice(0,10)+'.csv');
 }
 
 function renderHeatmap(data){
@@ -1185,39 +1291,6 @@ function mixColor(c1,c2,t){
   return 'rgb('+r+','+g+','+b+')';
 }
 
-function renderPendientes(data){
-  const pend = data.filter(r=>r.resultado==='PENDIENTE').slice().sort((a,b)=>{
-    const da = a.f_venta||''; const db = b.f_venta||'';
-    return db.localeCompare(da);
-  });
-  document.getElementById('pendCount').textContent = pend.length.toLocaleString('es-PE')+' pendientes';
-  const tbody = document.querySelector('#tblPendientes tbody');
-  tbody.innerHTML = pend.length ? pend.map(r=>{
-    const sinAsignar = !r.validador;
-    const cls = sinAsignar ? ' class="pend-alert"' : '';
-    const validadorLabel = sinAsignar ? 'Sin asignar' : formatNombre(r.validador);
-    return '<tr'+cls+'><td>'+(r.f_venta?diaLabel(r.f_venta):'—')+'</td><td>'+r.canal+'</td><td style="text-align:left; font-weight:600;">'+validadorLabel+'</td></tr>';
-  }).join('') : '<tr><td colspan="3" style="text-align:center; color:var(--ink-mute);">Sin ventas pendientes</td></tr>';
-}
-
-function getDevueltasMCData(){
-  const data = getFiltered();
-  return data.filter(r=> r.estadoWF==='WF DEVUELTO' && r.validador)
-    .map(r=> ({...r, motivoDevuelta: r.motivoDevuelta || 'Sin motivo registrado'}))
-    .filter(r=> !MOTIVOS_NO_IMPUTABLES.includes(r.motivoDevuelta));
-}
-
-function renderDevValidador(data){
-  const devueltas = getDevueltasMCData().slice().sort((a,b)=>{
-    const da=a.fechaDevolucion||''; const db=b.fechaDevolucion||'';
-    return db.localeCompare(da);
-  });
-  const tbody = document.querySelector('#tblDevValidador tbody');
-  tbody.innerHTML = devueltas.length ? devueltas.map(r=>
-    '<tr><td style="text-align:left;">'+(r.fechaDevolucion?diaLabel(r.fechaDevolucion):'—')+'</td><td style="text-align:left; font-weight:600;">'+formatNombre(r.validador)+'</td><td style="text-align:left;">'+r.motivoDevuelta+'</td></tr>'
-  ).join('') : '<tr><td colspan="3" style="text-align:center; color:var(--ink-mute);">Sin devueltas imputables al validador</td></tr>';
-}
-
 function descargarCSV(rows, header, filename){
   const lines = [header.join(';')];
   rows.forEach(row=>{
@@ -1236,46 +1309,12 @@ function descargarCSV(rows, header, filename){
   URL.revokeObjectURL(url);
 }
 
-function renderTotalErroresValidador(data){
-  const byVal = {};
-  data.forEach(r=>{
-    const key = r.validador || '';
-    if(!key) return;
-    byVal[key] = byVal[key] || {'Datos difiere / en blanco':0,'Llenado ficha':0,'Canal de venta':0, total:0};
-    (r.historialErrores||[]).forEach(ev=>{
-      const cat = CATEGORIA_ERROR[ev.motivo];
-      if(!cat) return;
-      byVal[key][cat] = (byVal[key][cat]||0)+1;
-      byVal[key].total++;
-    });
-  });
-  const rows = Object.entries(byVal).sort((a,b)=>b[1].total-a[1].total);
-  const tbody = document.querySelector('#tblTotalErroresValidador tbody');
-  const totals = {'Datos difiere / en blanco':0,'Llenado ficha':0,'Canal de venta':0, total:0};
-  rows.forEach(([,v])=>{ totals['Datos difiere / en blanco']+=v['Datos difiere / en blanco']; totals['Llenado ficha']+=v['Llenado ficha']; totals['Canal de venta']+=v['Canal de venta']; totals.total+=v.total; });
-  const pillFor = n => {
-    const cls = n===0 ? 'ok' : (n<=2 ? 'warn' : 'bad');
-    return '<span class="total-pill" style="background:var(--'+(cls==='ok'?'aqua-soft':cls==='warn'?'warn-soft':'bad-soft')+'); color:var(--'+(cls==='ok'?'aqua':cls)+');">'+n+'</span>';
-  };
-  tbody.innerHTML = (rows.length ? rows.map(([name,v])=>
-    '<tr><td>'+formatNombre(name)+'</td><td>'+v['Datos difiere / en blanco']+'</td><td>'+v['Llenado ficha']+'</td><td>'+v['Canal de venta']+'</td><td>'+pillFor(v.total)+'</td></tr>'
-  ).join('') : '<tr><td colspan="5" style="text-align:center; color:var(--ink-mute);">Sin datos</td></tr>')
-  + '<tr class="total-row"><td>Total general</td><td>'+totals['Datos difiere / en blanco']+'</td><td>'+totals['Llenado ficha']+'</td><td>'+totals['Canal de venta']+'</td><td>'+totals.total+'</td></tr>';
-}
-
-function descargarDevueltasMC(){
-  const rows = getDevueltasMCData().map(r=>[
-    r.dni, formatNombre(r.validador), r.motivoDevuelta, r.canal, r.fechaDevolucion?diaLabel(r.fechaDevolucion):''
-  ]);
-  descargarCSV(rows, ['DNI','Validador','Motivo','Canal','Fecha de devolución'], 'devueltas_mc_'+new Date().toISOString().slice(0,10)+'.csv');
-}
-
 function descargarDevueltasBanco(){
   const data = getFiltered().filter(r=>r.estadoWF==='WF DEVUELTO');
   const rows = data.map(r=>[
-    r.dni, formatNombre(r.ejecutivo), formatNombre(r.validador), r.motivoDevuelta||'Sin motivo registrado', r.canal, r.fechaDevolucion?diaLabel(r.fechaDevolucion):''
+    r.dni, formatNombre(r.ejecutivo), r.motivoDevuelta||'Sin motivo registrado', r.canal, r.fechaDevolucion?diaLabel(r.fechaDevolucion):''
   ]);
-  descargarCSV(rows, ['DNI','Ejecutivo','Validador','Motivo','Canal','Fecha de devolución'], 'wf_devueltas_'+new Date().toISOString().slice(0,10)+'.csv');
+  descargarCSV(rows, ['DNI','Ejecutivo','Motivo','Canal','Fecha de devolución'], 'wf_devueltas_'+new Date().toISOString().slice(0,10)+'.csv');
 }
 
 /* ============ VISTA POR ASESOR ============ */
