@@ -1533,12 +1533,24 @@ async function publishData(){
     const url = 'https://api.github.com/repos/'+GH_OWNER+'/'+GH_REPO+'/contents/'+GH_DATA_PATH;
     let sha = null;
     try{
-      const getRes = await fetch(url+'?ref='+GH_BRANCH, {headers:{Authorization:'token '+token}});
+      // Sin "ref": usa la rama por defecto del repositorio, sin necesidad de adivinar su nombre
+      const getRes = await fetch(url+'?_='+Date.now(), {headers:{Authorization:'token '+token, 'Cache-Control':'no-cache'}});
       if(getRes.ok){ const j = await getRes.json(); sha = j.sha; }
     }catch(e){}
-    const body = {message:'Actualizar datos del dashboard', content, branch:GH_BRANCH};
+    const body = {message:'Actualizar datos del dashboard', content};
     if(sha) body.sha = sha;
-    const putRes = await fetch(url, {method:'PUT', headers:{Authorization:'token '+token, 'Content-Type':'application/json'}, body:JSON.stringify(body)});
+    let putRes = await fetch(url, {method:'PUT', headers:{Authorization:'token '+token, 'Content-Type':'application/json'}, body:JSON.stringify(body)});
+    if(putRes.status===409){
+      // Conflicto de version: re-obtener el sha actual y reintentar una vez
+      try{
+        const retryGet = await fetch(url+'?_='+Date.now(), {headers:{Authorization:'token '+token, 'Cache-Control':'no-cache'}});
+        if(retryGet.ok){
+          const j = await retryGet.json();
+          body.sha = j.sha;
+          putRes = await fetch(url, {method:'PUT', headers:{Authorization:'token '+token, 'Content-Type':'application/json'}, body:JSON.stringify(body)});
+        }
+      }catch(e){}
+    }
     if(putRes.ok){
       statusEl.textContent = 'Publicado para todos ✓ · '+new Date().toLocaleTimeString('es-PE');
     } else {
