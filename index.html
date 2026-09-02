@@ -184,7 +184,7 @@
   </div>
 
   <div id="dashboard" class="hidden">
-    <div class="filters">
+    <div class="filters" id="filtersGlobal">
       <div class="fgroup"><label>Canal</label><select id="fCanal"><option value="">Todos</option><option value="TLM">TC TLM</option><option value="WEB">TC WEB</option></select></div>
       <div class="fgroup"><label>Mes</label><select id="fMes"><option value="">Todos</option></select></div>
       <div class="fgroup"><label>Día</label><select id="fDia"><option value="">Todos los días</option></select></div>
@@ -674,6 +674,7 @@ document.querySelectorAll('.tab').forEach(t=>{
     document.getElementById('viewMC').classList.toggle('hidden', currentView!=='mc');
     document.getElementById('viewAsesor').classList.toggle('hidden', currentView!=='asesor');
     document.getElementById('viewRespaldada').classList.toggle('hidden', currentView!=='respaldada');
+    document.getElementById('filtersGlobal').classList.toggle('hidden', currentView==='respaldada');
     render();
   });
 });
