@@ -1126,19 +1126,21 @@ function renderEfectividad(data){
 function renderHeatmap(data){
   const validaConHora = data.filter(r=>r.resultado==='VALIDA' && r.hora!==null && r.fechaGestionDia);
   const days = [...new Set(validaConHora.map(r=>r.fechaGestionDia))].sort();
-  if(!days.includes(heatmapDay)) heatmapDay = days.length ? days[days.length-1] : null;
+  if(heatmapDay===null || (heatmapDay!=='ALL' && !days.includes(heatmapDay))) heatmapDay = 'ALL';
 
   const barEl = document.getElementById('heatmapDayBar');
-  barEl.innerHTML = days.map(d=>{
+  let barHtml = '<button class="daybtn'+(heatmapDay==='ALL'?' active':'')+'" data-day="ALL">Todos</button>';
+  barHtml += days.map(d=>{
     const [y,m,dd]=d.split('-');
     const active = d===heatmapDay ? ' active' : '';
     return '<button class="daybtn'+active+'" data-day="'+d+'">'+parseInt(dd)+'</button>';
   }).join('');
+  barEl.innerHTML = barHtml;
   barEl.querySelectorAll('.daybtn').forEach(b=>{
     b.addEventListener('click', ()=>{ heatmapDay = b.getAttribute('data-day'); render(); });
   });
 
-  const dayData = heatmapDay ? validaConHora.filter(r=>r.fechaGestionDia===heatmapDay) : [];
+  const dayData = heatmapDay==='ALL' ? validaConHora : validaConHora.filter(r=>r.fechaGestionDia===heatmapDay);
   const validadores = [...new Set(dayData.map(r=>r.validador).filter(Boolean))].sort();
   const horas = [...new Set(dayData.map(r=>r.hora))].sort((a,b)=>a-b);
 
@@ -1146,7 +1148,7 @@ function renderHeatmap(data){
   const tbody = document.querySelector('#tblHeatmap tbody');
   if(!validadores.length || !horas.length){
     thead.innerHTML = '';
-    tbody.innerHTML = '<tr><td style="text-align:center; color:var(--ink-mute); padding:20px;">Sin datos de hora de validación para este día</td></tr>';
+    tbody.innerHTML = '<tr><td style="text-align:center; color:var(--ink-mute); padding:20px;">Sin datos de hora de validación para este periodo</td></tr>';
     return;
   }
 
@@ -1161,7 +1163,7 @@ function renderHeatmap(data){
     });
   });
 
-  thead.innerHTML = '<tr><th style="text-align:left;">Validador</th>'+horas.map(h=>'<th style="text-align:center;">'+h+':00</th>').join('')+'<th>Total día</th></tr>';
+  thead.innerHTML = '<tr><th style="text-align:left;">Validador</th>'+horas.map(h=>'<th style="text-align:center;">'+h+':00</th>').join('')+'<th>Total</th></tr>';
   tbody.innerHTML = validadores.map(v=>{
     let totalDia = 0;
     const cells = horas.map(h=>{
